@@ -19,6 +19,8 @@ Education сейчас выглядит наиболее вероятным на
 
 - [`brainstorm/task.md`](brainstorm/task.md) - краткая сводка условий хакатона, критериев оценки, правил брейншторма, тегов и шаблона идеи.
 - [`brainstorm/ideas.md`](brainstorm/ideas.md) - рабочий список продуктовых гипотез по разным нишам.
+- [`brainstorm/edu-games-gpt5.5.md`](brainstorm/edu-games-gpt5.5.md) - отдельная ветка идей для обучающих игр по разным жанрам.
+- [`brainstorm/edu-games-opus4.8.md`](brainstorm/edu-games-opus4.8.md) - параллельная ветка идей для обучающих игр (рогалики, deckbuilder, tower defense, escape room, party-quiz и др.) с подсказками по готовым ассетам (Kenney.nl, itch.io).
 
 ## Что важно для идеи
 
