@@ -319,7 +319,7 @@ Education пока выглядит наиболее близкой нишей, 
 
 ---
 
-Идея 14: AI для поиска призвания через ежедневные микро-выборы
+Идея 15: AI для поиска призвания через ежедневные микро-выбор
 
 Теги: #self-discovery, #career-guidance, #psychology, #edtech, #ai, #personalization, #gamification, #habit, #daily-engagement, #b2c, #career, #student
 
