@@ -36,9 +36,31 @@
 
 ### Корень репозитория
 
-| Файл | Назначение |
+| Файл / папка | Назначение |
 |---|---|
 | [`senior-check_project-brief.md`](senior-check_project-brief.md) | Ранний тактический бриф Senior Check (48 ч, веб-чек-ин). Частично устарел — заменён расширенным [`hackaton/hearbeat_project-guide.md`](hackaton/hearbeat_project-guide.md) |
+| [`.specify/`](.specify/) | **GitHub Spec Kit** — шаблоны, скрипты и workflow для spec-driven development |
+| [`.cursor/skills/speckit-*`](.cursor/skills/) | Skills для Cursor Agent: `/speckit-constitution`, `/speckit-specify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-implement` и др. |
+
+## Spec Kit (spec-driven development)
+
+В проект добавлен [GitHub Spec Kit](https://github.github.com/spec-kit/) v0.12.4 с интеграцией **Cursor**.
+
+**Типичный workflow в Cursor Agent:**
+
+1. `/speckit-constitution` — зафиксировать принципы проекта (что, зачем, ограничения)
+2. `/speckit-specify` — описать фичу: что строим и почему (без выбора стека)
+3. `/speckit-plan` — технический план реализации
+4. `/speckit-tasks` — разбить план на задачи
+5. `/speckit-implement` — выполнить реализацию
+
+Опционально: `/speckit-clarify` (до плана), `/speckit-checklist` и `/speckit-analyze` (после плана/задач).
+
+**Обновление Spec Kit** (нужен [uv](https://docs.astral.sh/uv/)):
+
+```powershell
+uvx --from git+https://github.com/github/spec-kit.git@v0.12.4 specify integration upgrade cursor-agent --script ps
+```
 
 ## Какой документ читать
 
@@ -49,6 +71,7 @@
 | Разобраться в блоках методички | [`hackaton/hackathon-blocks-reference-guide.md`](hackaton/hackathon-blocks-reference-guide.md) |
 | Подготовить всё до 11 июля | [`hackaton/pre-hackathon-prep-guide.md`](hackaton/pre-hackathon-prep-guide.md) |
 | Сравнить с другими идеями | [`brainstorm/ideas.md`](brainstorm/ideas.md) |
+| Начать spec-driven разработку фичи | Spec Kit skills в Cursor: `/speckit-constitution` → `/speckit-specify` → … |
 
 ## HearBeat в двух словах
 

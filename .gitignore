@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+
+# HearBeat
+HearBeat/ml/.env
+HearBeat/ml/.venv/
+HearBeat/web/.env
+HearBeat/data/audio/**/*.wav
+!HearBeat/data/audio/demo/
+HearBeat/web/public/demo-audio/*.wav

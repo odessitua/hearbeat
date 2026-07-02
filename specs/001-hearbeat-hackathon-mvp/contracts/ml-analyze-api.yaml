@@ -1,0 +1,183 @@
+openapi: 3.0.3
+info:
+  title: HearBeat ML Analyze API
+  description: |
+    Acoustic analysis service for HearBeat hackathon MVP.
+    Compares voice features against personal baseline and returns
+    vitality score, status, and plain-language deviation text.
+  version: 0.1.0
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+  - url: https://{deploy}.railway.app
+    description: Hackathon deployment
+    variables:
+      deploy:
+        default: hearbeat-ml
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /analyze:
+    post:
+      summary: Analyze voice check-in audio
+      operationId: analyzeCheckin
+      description: |
+        Extracts acoustic features, compares to profile baseline from Supabase
+        (or inline baseline_features for offline CLI), returns scoring fields
+        matching the checkins table analysis columns.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - profile_id
+              properties:
+                profile_id:
+                  type: string
+                  example: demo-maria
+                audio_file:
+                  type: string
+                  format: binary
+                  description: WAV or MP3 recording (preferred for live check-in)
+                audio_url:
+                  type: string
+                  format: uri
+                  description: Alternative — fetch audio from Supabase Storage URL
+                scenario_label:
+                  type: string
+                  enum:
+                    - baseline
+                    - normal_day
+                    - tired_day
+                    - edge_case
+                    - live
+                  default: live
+                baseline_features:
+                  type: string
+                  description: |
+                    Optional JSON string of baseline feature means for offline
+                    testing without Supabase round-trip
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeJsonRequest'
+      responses:
+        '200':
+          description: Analysis complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResponse'
+        '400':
+          description: Invalid audio or missing profile_id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Audio too short or silent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    AnalyzeJsonRequest:
+      type: object
+      required:
+        - profile_id
+      properties:
+        profile_id:
+          type: string
+        audio_url:
+          type: string
+          format: uri
+        scenario_label:
+          type: string
+          default: live
+
+    AcousticFeatures:
+      type: object
+      required:
+        - tempo_bpm
+        - pause_mean_ms
+        - pitch_std_hz
+        - energy_rms
+        - duration_sec
+      properties:
+        tempo_bpm:
+          type: number
+          format: float
+        pause_mean_ms:
+          type: number
+          format: float
+        pitch_std_hz:
+          type: number
+          format: float
+        energy_rms:
+          type: number
+          format: float
+        duration_sec:
+          type: number
+          format: float
+
+    AnalyzeResponse:
+      type: object
+      required:
+        - features_json
+        - vitality_score
+        - status
+        - acoustic_delta
+      properties:
+        features_json:
+          $ref: '#/components/schemas/AcousticFeatures'
+        vitality_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          example: 72.5
+        status:
+          type: string
+          enum:
+            - normal
+            - check-in needed
+          example: check-in needed
+        acoustic_delta:
+          type: string
+          example: Темп мовлення нижчий на 22%, паузи довші на 38%
+        summary_for_family:
+          type: string
+          description: Optional template summary (P3)
+          example: Сьогодні голос звучить більш втомлено, ніж зазвичай. Варто подзвонити ввечері.
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+          enum:
+            - AUDIO_TOO_SHORT
+            - AUDIO_SILENT
+            - INVALID_FORMAT
+            - BASELINE_INSUFFICIENT

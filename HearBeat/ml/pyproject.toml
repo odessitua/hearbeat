@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hearbeat-ml"
+version = "0.1.0"
+description = "HearBeat acoustic analysis API for hackathon MVP"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "librosa>=0.10.2",
+    "numpy>=1.26.0",
+    "soundfile>=0.12.1",
+    "httpx>=0.28.0",
+    "pydantic>=2.10.0",
+    "python-multipart>=0.0.18",
+    "python-dotenv>=1.0.0",
+    "supabase>=2.11.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "scipy>=1.14.0",
+]
+
+[project.scripts]
+hearbeat-features = "hearbeat_ml.features:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hearbeat_ml*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

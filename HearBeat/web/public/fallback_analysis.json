@@ -1,0 +1,54 @@
+{
+  "normal_day": {
+    "vitality_score": 82,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "features_json": {
+      "tempo_bpm": 115,
+      "pause_mean_ms": 400,
+      "pitch_std_hz": 30,
+      "energy_rms": 0.045,
+      "duration_sec": 16
+    },
+    "summary_for_family": "Голос звучить як зазвичай. Сьогодні особливих приводів для тривоги немає."
+  },
+  "tired_day": {
+    "vitality_score": 55,
+    "status": "check-in needed",
+    "acoustic_delta": "Темп нижчий на 28%, паузи довші на 42%",
+    "features_json": {
+      "tempo_bpm": 88,
+      "pause_mean_ms": 620,
+      "pitch_std_hz": 21,
+      "energy_rms": 0.028,
+      "duration_sec": 19
+    },
+    "summary_for_family": "Сьогодні голос звучить більш втомлено, ніж зазвичай. Можливо, варто подзвонити ввечері."
+  },
+  "live_normal": {
+    "vitality_score": 84,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "features_json": {
+      "tempo_bpm": 116,
+      "pause_mean_ms": 390,
+      "pitch_std_hz": 29,
+      "energy_rms": 0.044,
+      "duration_sec": 15
+    },
+    "summary_for_family": "Чек-ін пройшов добре. Голос звучить звично."
+  },
+  "live_tired": {
+    "vitality_score": 52,
+    "status": "check-in needed",
+    "acoustic_delta": "Темп нижчий на 24%, паузи довші на 45%",
+    "features_json": {
+      "tempo_bpm": 86,
+      "pause_mean_ms": 640,
+      "pitch_std_hz": 20,
+      "energy_rms": 0.027,
+      "duration_sec": 18
+    },
+    "summary_for_family": "Сьогодні голос звучить втомленіше. Рекомендуємо подзвонити."
+  }
+}

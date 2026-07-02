@@ -1,0 +1,515 @@
+[
+  {
+    "id": "48d0d6e0-2702-4795-bc66-1bc78cb6f36d",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_0.wav",
+    "created_at": "2026-06-01T19:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 78.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "7d68bbbd-2711-4c3d-9081-8adf3dfb8318",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_1.wav",
+    "created_at": "2026-06-02T20:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 79.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "c8d3adcd-ae81-498d-9842-4bce5b8867de",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_2.wav",
+    "created_at": "2026-06-03T21:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 80.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "674db504-80e9-4dee-9623-535595da55ea",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_3.wav",
+    "created_at": "2026-06-04T22:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 81.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "c916482e-a8d7-4474-b646-23f4e8264b93",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_4.wav",
+    "created_at": "2026-06-05T23:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 82.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "d9ff49dd-0296-4e35-9cac-1e3e9553cb28",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_5.wav",
+    "created_at": "2026-06-06T19:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 78.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "d47269d0-0ab9-4d28-b537-7e61d8ac5c99",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_6.wav",
+    "created_at": "2026-06-07T20:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 79.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "99b795f0-5b5b-42a4-9d3c-c56eef3381fc",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_7.wav",
+    "created_at": "2026-06-08T21:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 80.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "b2680c3e-ca49-4b41-ae96-6b92905c2eb8",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_8.wav",
+    "created_at": "2026-06-09T22:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 81.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "cacc99b6-5064-4d85-82db-013df971928e",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_9.wav",
+    "created_at": "2026-06-10T23:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 82.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "46ec6367-6d07-4181-993a-11caa11538ba",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_10.wav",
+    "created_at": "2026-06-11T19:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 78.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "1b3b289a-576a-4735-b089-a8e7c60eb2ba",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/normal_day_10.wav",
+    "created_at": "2026-06-11T20:00:00+00:00",
+    "scenario_label": "normal_day",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 82.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Усе на звичному рівні."
+  },
+  {
+    "id": "9c77276f-7ced-4c8c-bb3c-67c0062e625f",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/baseline_11.wav",
+    "created_at": "2026-06-12T20:00:00+00:00",
+    "scenario_label": "baseline",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 79.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Марія звучить спокійно, як завжди."
+  },
+  {
+    "id": "b71f16a7-359e-4308-aa2f-80e38d69cbc2",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/normal_day_11.wav",
+    "created_at": "2026-06-12T20:00:00+00:00",
+    "scenario_label": "normal_day",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 83.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Усе на звичному рівні."
+  },
+  {
+    "id": "50846e6b-e0f0-4dd9-a1a9-7fcde0afa2b3",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/normal_day_12.wav",
+    "created_at": "2026-06-13T20:00:00+00:00",
+    "scenario_label": "normal_day",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 84.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Усе на звичному рівні."
+  },
+  {
+    "id": "c9b11344-9e3f-4fc4-b2f2-196dd1fc15c3",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/normal_day_13.wav",
+    "created_at": "2026-06-14T20:00:00+00:00",
+    "scenario_label": "normal_day",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 85.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Усе на звичному рівні."
+  },
+  {
+    "id": "664425a4-848d-4b29-b0be-f3f119f0a29e",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/normal_day_14.wav",
+    "created_at": "2026-06-15T20:00:00+00:00",
+    "scenario_label": "normal_day",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 86.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Усе на звичному рівні."
+  },
+  {
+    "id": "3ae238c4-8f43-4f72-8188-41e6a3ec9192",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/tired_day_14.wav",
+    "created_at": "2026-06-15T21:00:00+00:00",
+    "scenario_label": "tired_day",
+    "transcript": "Трохи втомилась сьогодні.",
+    "features_json": {
+      "tempo_bpm": 88.0,
+      "pause_mean_ms": 620.0,
+      "pitch_std_hz": 21.0,
+      "energy_rms": 0.028,
+      "duration_sec": 19.0
+    },
+    "vitality_score": 55.0,
+    "status": "check-in needed",
+    "acoustic_delta": "Темп нижчий на 28%, паузи довші на 42%",
+    "summary_for_family": "Сьогодні голос звучить втомленіше. Можливо, варто подзвонити."
+  },
+  {
+    "id": "ee059f9e-d95a-4fec-86e1-c17c7018b7b8",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/normal_day_15.wav",
+    "created_at": "2026-06-16T20:00:00+00:00",
+    "scenario_label": "normal_day",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 87.0,
+    "status": "normal",
+    "acoustic_delta": "Голос звучить як зазвичай",
+    "summary_for_family": "Усе на звичному рівні."
+  },
+  {
+    "id": "a6b2c584-f3a5-4bb9-a0ee-0d492cde9ac6",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/tired_day_15.wav",
+    "created_at": "2026-06-16T21:00:00+00:00",
+    "scenario_label": "tired_day",
+    "transcript": "Трохи втомилась сьогодні.",
+    "features_json": {
+      "tempo_bpm": 88.0,
+      "pause_mean_ms": 620.0,
+      "pitch_std_hz": 21.0,
+      "energy_rms": 0.028,
+      "duration_sec": 19.0
+    },
+    "vitality_score": 56.0,
+    "status": "check-in needed",
+    "acoustic_delta": "Темп нижчий на 28%, паузи довші на 42%",
+    "summary_for_family": "Сьогодні голос звучить втомленіше. Можливо, варто подзвонити."
+  },
+  {
+    "id": "682d7c47-5711-42d4-89dc-8ebb7f08e1c4",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/tired_day_16.wav",
+    "created_at": "2026-06-17T21:00:00+00:00",
+    "scenario_label": "tired_day",
+    "transcript": "Трохи втомилась сьогодні.",
+    "features_json": {
+      "tempo_bpm": 88.0,
+      "pause_mean_ms": 620.0,
+      "pitch_std_hz": 21.0,
+      "energy_rms": 0.028,
+      "duration_sec": 19.0
+    },
+    "vitality_score": 57.0,
+    "status": "check-in needed",
+    "acoustic_delta": "Темп нижчий на 28%, паузи довші на 42%",
+    "summary_for_family": "Сьогодні голос звучить втомленіше. Можливо, варто подзвонити."
+  },
+  {
+    "id": "e712f440-544a-4270-a527-0dfb12fa47f0",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/tired_day_17.wav",
+    "created_at": "2026-06-18T21:00:00+00:00",
+    "scenario_label": "tired_day",
+    "transcript": "Трохи втомилась сьогодні.",
+    "features_json": {
+      "tempo_bpm": 88.0,
+      "pause_mean_ms": 620.0,
+      "pitch_std_hz": 21.0,
+      "energy_rms": 0.028,
+      "duration_sec": 19.0
+    },
+    "vitality_score": 58.0,
+    "status": "check-in needed",
+    "acoustic_delta": "Темп нижчий на 28%, паузи довші на 42%",
+    "summary_for_family": "Сьогодні голос звучить втомленіше. Можливо, варто подзвонити."
+  },
+  {
+    "id": "b7c5e746-f877-4a20-8c94-4f76a7e93b65",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/tired_day_18.wav",
+    "created_at": "2026-06-19T21:00:00+00:00",
+    "scenario_label": "tired_day",
+    "transcript": "Трохи втомилась сьогодні.",
+    "features_json": {
+      "tempo_bpm": 88.0,
+      "pause_mean_ms": 620.0,
+      "pitch_std_hz": 21.0,
+      "energy_rms": 0.028,
+      "duration_sec": 19.0
+    },
+    "vitality_score": 59.0,
+    "status": "check-in needed",
+    "acoustic_delta": "Темп нижчий на 28%, паузи довші на 42%",
+    "summary_for_family": "Сьогодні голос звучить втомленіше. Можливо, варто подзвонити."
+  },
+  {
+    "id": "c3849181-4e2b-4be0-b4a1-3b4255aac703",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/edge_case_18.wav",
+    "created_at": "2026-06-20T00:00:00+00:00",
+    "scenario_label": "edge_case",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 70.0,
+    "status": "normal",
+    "acoustic_delta": "Короткий запис оброблено",
+    "summary_for_family": "Коротка відповідь без тривоги."
+  },
+  {
+    "id": "28806f88-a7fa-4938-8beb-bfe2637ac917",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/tired_day_19.wav",
+    "created_at": "2026-06-20T21:00:00+00:00",
+    "scenario_label": "tired_day",
+    "transcript": "Трохи втомилась сьогодні.",
+    "features_json": {
+      "tempo_bpm": 88.0,
+      "pause_mean_ms": 620.0,
+      "pitch_std_hz": 21.0,
+      "energy_rms": 0.028,
+      "duration_sec": 19.0
+    },
+    "vitality_score": 60.0,
+    "status": "check-in needed",
+    "acoustic_delta": "Темп нижчий на 28%, паузи довші на 42%",
+    "summary_for_family": "Сьогодні голос звучить втомленіше. Можливо, варто подзвонити."
+  },
+  {
+    "id": "6855fe8c-d9a3-4569-b115-c3f5915bd07c",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/edge_case_19.wav",
+    "created_at": "2026-06-21T00:00:00+00:00",
+    "scenario_label": "edge_case",
+    "transcript": "День нормальний, була вдома.",
+    "features_json": {
+      "tempo_bpm": 115.0,
+      "pause_mean_ms": 400.0,
+      "pitch_std_hz": 30.0,
+      "energy_rms": 0.045,
+      "duration_sec": 16.0
+    },
+    "vitality_score": 70.0,
+    "status": "normal",
+    "acoustic_delta": "Короткий запис оброблено",
+    "summary_for_family": "Коротка відповідь без тривоги."
+  },
+  {
+    "id": "a24999e0-9a05-4061-b40b-d687b297fe16",
+    "profile_id": "demo-maria",
+    "audio_url": "https://demo.hearbeat.local/audio/tired_day_22.wav",
+    "created_at": "2026-06-24T04:00:00+00:00",
+    "scenario_label": "tired_day",
+    "transcript": "Трохи втомилась сьогодні.",
+    "features_json": {
+      "tempo_bpm": 88.0,
+      "pause_mean_ms": 620.0,
+      "pitch_std_hz": 21.0,
+      "energy_rms": 0.028,
+      "duration_sec": 19.0
+    },
+    "vitality_score": 55.0,
+    "status": "check-in needed",
+    "acoustic_delta": "Темп нижчий на 28%, паузи довші на 42%",
+    "summary_for_family": "Сьогодні голос звучить втомленіше. Можливо, варто подзвонити."
+  }
+]
