@@ -28,10 +28,10 @@ export function VoiceQuestion({
       </button>
       <div className="demo-row">
         <button type="button" className="btn-secondary" onClick={() => onDemo('normal')}>
-          Демо: як зазвичай
+          Демо: як зазвичай ▶
         </button>
         <button type="button" className="btn-secondary" onClick={() => onDemo('tired')}>
-          Демо: втомлений день
+          Демо: втомлений день ▶
         </button>
       </div>
       {error && <p className="error-text">{error}</p>}

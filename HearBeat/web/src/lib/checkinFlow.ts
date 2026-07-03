@@ -1,4 +1,5 @@
 import { insertCheckIn, updateCheckIn, uploadAudio } from './supabase';
+import { getPersonalBaseline } from './personalBaseline';
 
 import type { AnalyzeResult, CheckIn } from '../types/checkin';
 import { DEMO_PROFILE_ID } from '../types/checkin';
@@ -7,15 +8,39 @@ type FallbackMap = Record<string, AnalyzeResult>;
 
 let cache: FallbackMap | null = null;
 
-const ML_URL = (import.meta.env.VITE_ML_API_URL as string | undefined) ?? 'http://localhost:8000';
+const ML_URL =
+  (import.meta.env.VITE_ML_API_URL as string | undefined) ??
+  (import.meta.env.DEV ? '/ml-api' : 'http://localhost:8000');
 
-/** Maria's seeded baseline — used in mock mode when Supabase has no baseline rows. */
-const DEMO_BASELINE_JSON = JSON.stringify({
-  tempo_bpm: 115,
-  pause_mean_ms: 400,
-  pitch_std_hz: 30,
-  energy_rms: 0.045,
-});
+export { ML_URL };
+
+/** Baseline = acoustic profile of demo normal_response.wav (see generate_demo_audio.py). */
+export const DEMO_BASELINE = {
+  tempo_bpm: 93.17,
+  pause_mean_ms: 314.52,
+  pitch_std_hz: 229.92,
+  energy_rms: 0.0266,
+} as const;
+
+const DEMO_BASELINE_JSON = JSON.stringify(DEMO_BASELINE);
+
+function resolveBaselineJson(options?: {
+  useDemoBaseline?: boolean;
+  /** Demo WAV buttons always compare to synthetic demo profile. */
+  forceDemoBaseline?: boolean;
+}): string | undefined {
+  if (!options?.forceDemoBaseline) {
+    const personal = getPersonalBaseline();
+    if (personal) {
+      return JSON.stringify(personal);
+    }
+  }
+  const useDemo = options?.useDemoBaseline ?? import.meta.env.VITE_USE_MOCK === 'true';
+  if (useDemo || options?.forceDemoBaseline) {
+    return DEMO_BASELINE_JSON;
+  }
+  return undefined;
+}
 
 async function loadFallbackMap(): Promise<FallbackMap> {
   if (cache) {
@@ -38,26 +63,73 @@ export async function loadDemoAudio(kind: 'normal' | 'tired'): Promise<Blob> {
 async function callAnalyze(
   audioBlob: Blob,
   scenario: 'live' | 'normal_day' | 'tired_day',
+  options?: {
+    allowFallback?: boolean;
+    useDemoBaseline?: boolean;
+    includeSeries?: boolean;
+    forceDemoBaseline?: boolean;
+    baselineCalibrated?: boolean;
+  },
 ): Promise<AnalyzeResult> {
+  const allowFallback = options?.allowFallback ?? true;
+  const includeSeries = options?.includeSeries ?? false;
+  const baselineJson = resolveBaselineJson({
+    useDemoBaseline: options?.useDemoBaseline,
+    forceDemoBaseline: options?.forceDemoBaseline,
+  });
+  const calibrated =
+    options?.baselineCalibrated ??
+    (!options?.forceDemoBaseline && getPersonalBaseline() !== null);
+
   const form = new FormData();
   form.append('profile_id', DEMO_PROFILE_ID);
   form.append('scenario_label', scenario);
   form.append('audio_file', audioBlob, 'checkin.wav');
-  if (import.meta.env.VITE_USE_MOCK === 'true') {
-    form.append('baseline_features', DEMO_BASELINE_JSON);
+  if (baselineJson) {
+    form.append('baseline_features', baselineJson);
+  }
+  if (calibrated) {
+    form.append('baseline_calibrated', 'true');
+  }
+  if (includeSeries) {
+    form.append('include_series', 'true');
   }
 
   try {
     const resp = await fetch(`${ML_URL}/analyze`, { method: 'POST', body: form });
     if (!resp.ok) {
-      throw new Error(`ML API ${resp.status}`);
+      const detail = await resp.text();
+      throw new Error(`ML API ${resp.status}: ${detail.slice(0, 120)}`);
     }
     return (await resp.json()) as AnalyzeResult;
-  } catch {
+  } catch (err) {
+    if (!allowFallback) {
+      throw err instanceof Error ? err : new Error('ML API недоступний');
+    }
     const fallbacks = await loadFallbackMap();
     const key = scenario === 'tired_day' ? 'live_tired' : 'live_normal';
     return fallbacks[key];
   }
+}
+
+/** Analyze audio via ML API — for lab/demo without saving to Supabase. */
+export async function analyzeAudio(
+  audioBlob: Blob,
+  options?: {
+    allowFallback?: boolean;
+    useDemoBaseline?: boolean;
+    includeSeries?: boolean;
+    forceDemoBaseline?: boolean;
+    baselineCalibrated?: boolean;
+  },
+): Promise<AnalyzeResult> {
+  return callAnalyze(audioBlob, 'live', {
+    allowFallback: options?.allowFallback,
+    useDemoBaseline: options?.useDemoBaseline ?? true,
+    includeSeries: options?.includeSeries ?? true,
+    forceDemoBaseline: options?.forceDemoBaseline,
+    baselineCalibrated: options?.baselineCalibrated,
+  });
 }
 
 export async function completeCheckIn(

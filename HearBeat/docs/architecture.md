@@ -179,15 +179,16 @@ features.py          tempo_bpm, pause_mean_ms, pitch_std_hz, energy_rms
 baseline.py          среднее по 10 прошлым «нормальным» чек-инам
    │                 (из Supabase или baseline_features в запросе)
    ▼
-scoring.py           сравнение с baseline → vitality_score (0–100)
-   │                 status: "normal" | "check-in needed"
-   │                 acoustic_delta: «Темп нижчий на 28%…»
+scoring.py           acoustic_index (без стелі, 100=baseline), metric_deviations (±%)
+   │                 vitality_score (legacy 0–100), status, acoustic_delta
    ▼
 summary.py           короткое предложение для семьи (шаблон или LLM)
    │
    ▼
-JSON ответ           тот же формат, что в таблице checkins
+JSON ответ           см. docs/acoustic-scoring.md
 ```
+
+Подробнее про индекс, калибровку и dashboard: [acoustic-scoring.md](./acoustic-scoring.md).
 
 Контракт API: `specs/001-hearbeat-hackathon-mvp/contracts/ml-analyze-api.yaml`
 

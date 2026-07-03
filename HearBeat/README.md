@@ -4,6 +4,7 @@ Voice check-in demo: emulated call → acoustic analysis → family dashboard.
 
 **Specs**: [`../specs/001-hearbeat-hackathon-mvp/`](../specs/001-hearbeat-hackathon-mvp/)  
 **Architecture**: [`docs/architecture.md`](docs/architecture.md) — структура папок, потоки данных, mock-режим  
+**Scoring**: [`docs/acoustic-scoring.md`](docs/acoustic-scoring.md) — acoustic index, baseline, тренд  
 **Validation**: [`../specs/001-hearbeat-hackathon-mvp/quickstart.md`](../specs/001-hearbeat-hackathon-mvp/quickstart.md)
 
 ## Quick start
@@ -47,6 +48,7 @@ npm run dev
 
 - Check-in: http://localhost:5173/check-in
 - Dashboard: http://localhost:5173/dashboard
+- ML-тест (запис → оцінка): http://localhost:5173/ml-demo
 
 ## Lovable sync (optional)
 

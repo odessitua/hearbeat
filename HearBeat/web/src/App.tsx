@@ -2,6 +2,7 @@ import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react
 
 import { CheckInPage } from './pages/CheckInPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { MlDemoPage } from './pages/MlDemoPage';
 
 import './index.css';
 
@@ -16,6 +17,9 @@ function Nav() {
       <Link to="/check-in" className={location.pathname === '/check-in' ? 'active' : ''}>
         Чек-ін
       </Link>
+      <Link to="/ml-demo" className={location.pathname === '/ml-demo' ? 'active' : ''}>
+        ML-тест
+      </Link>
     </nav>
   );
 }
@@ -27,6 +31,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/check-in" element={<CheckInPage />} />
+        <Route path="/ml-demo" element={<MlDemoPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
       </Routes>
     </BrowserRouter>

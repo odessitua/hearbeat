@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { ConsentBanner } from '../components/ConsentBanner';
 import { IncomingCall } from '../components/IncomingCall';
 import { VoiceQuestion } from '../components/VoiceQuestion';
-import { RecordingError, recordAudio } from '../lib/audioRecorder';
+import { playAudioBlob, RecordingError, recordAudio } from '../lib/audioRecorder';
 import { completeCheckIn, loadDemoAudio } from '../lib/checkinFlow';
 
 import type { CheckIn } from '../types/checkin';
@@ -68,6 +68,7 @@ export function CheckInPage() {
     setError(null);
     try {
       const blob = await loadDemoAudio(kind);
+      playAudioBlob(blob);
       await advanceOrFinish(blob, kind);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Демо-аудіо недоступне');

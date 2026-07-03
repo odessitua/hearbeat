@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Tuple
 
 import librosa
 import numpy as np
@@ -16,11 +16,11 @@ MIN_DURATION_SEC = 0.5
 FRAME_LENGTH = 2048
 HOP_LENGTH = 512
 RMS_THRESHOLD = 0.01
+MAX_SERIES_POINTS = 240
 
 
-def extract_features(audio_path: str | Path) -> Dict[str, float]:
-    """Load audio and return tempo, pause, pitch, and energy features."""
-    path = Path(audio_path)
+def _load_audio(path: Path) -> Tuple[NDArray[np.floating[Any]], int, NDArray[np.floating[Any]], float]:
+    """Load mono audio and per-frame RMS; raise on too short or silent."""
     y, sr = librosa.load(path, sr=22050, mono=True)
     duration_sec = float(len(y) / sr)
     if duration_sec < MIN_DURATION_SEC:
@@ -29,6 +29,61 @@ def extract_features(audio_path: str | Path) -> Dict[str, float]:
     rms = librosa.feature.rms(y=y, frame_length=FRAME_LENGTH, hop_length=HOP_LENGTH)[0]
     if float(np.max(rms)) < RMS_THRESHOLD:
         raise ValueError("AUDIO_SILENT")
+
+    return y, sr, rms, duration_sec
+
+
+def _frame_times(num_frames: int, sr: int) -> NDArray[np.floating[Any]]:
+    return librosa.frames_to_time(np.arange(num_frames), sr=sr, hop_length=HOP_LENGTH)
+
+
+def _downsample_rms_series(
+    times: NDArray[np.floating[Any]],
+    values: NDArray[np.floating[Any]],
+    max_points: int,
+) -> List[Dict[str, float]]:
+    """Reduce RMS points for chart payload size."""
+    n = len(times)
+    if n == 0:
+        return []
+    if n <= max_points:
+        return [
+            {"t_sec": round(float(t), 3), "rms": round(float(v), 5)}
+            for t, v in zip(times, values)
+        ]
+    indices = np.linspace(0, n - 1, max_points, dtype=int)
+    return [
+        {"t_sec": round(float(times[i]), 3), "rms": round(float(values[i]), 5)}
+        for i in indices
+    ]
+
+
+def _downsample_pitch_series(
+    times: List[float],
+    hz_values: List[float],
+    max_points: int,
+) -> List[Dict[str, float]]:
+    if not times:
+        return []
+    t_arr = np.array(times, dtype=np.float64)
+    h_arr = np.array(hz_values, dtype=np.float64)
+    n = len(t_arr)
+    if n <= max_points:
+        return [
+            {"t_sec": round(float(t), 3), "hz": round(float(h), 2)}
+            for t, h in zip(t_arr, h_arr)
+        ]
+    indices = np.linspace(0, n - 1, max_points, dtype=int)
+    return [
+        {"t_sec": round(float(t_arr[i]), 3), "hz": round(float(h_arr[i]), 2)}
+        for i in indices
+    ]
+
+
+def extract_features(audio_path: str | Path) -> Dict[str, float]:
+    """Load audio and return tempo, pause, pitch, and energy features."""
+    path = Path(audio_path)
+    y, sr, rms, duration_sec = _load_audio(path)
 
     tempo_bpm = _estimate_tempo(y, sr)
     pause_mean_ms = _estimate_pause_mean_ms(rms, sr)
@@ -41,6 +96,33 @@ def extract_features(audio_path: str | Path) -> Dict[str, float]:
         "pitch_std_hz": round(pitch_std_hz, 2),
         "energy_rms": round(energy_rms, 4),
         "duration_sec": round(duration_sec, 2),
+    }
+
+
+def extract_time_series(audio_path: str | Path) -> Dict[str, Any]:
+    """Per-frame RMS envelope and voiced pitch contour for visualization."""
+    path = Path(audio_path)
+    y, sr, rms, _duration_sec = _load_audio(path)
+    times = _frame_times(len(rms), sr)
+    rms_envelope = _downsample_rms_series(times, rms, MAX_SERIES_POINTS)
+
+    pitches, magnitudes = librosa.piptrack(y=y, sr=sr, hop_length=HOP_LENGTH)
+    pitch_times: List[float] = []
+    pitch_hz: List[float] = []
+    for frame_idx in range(pitches.shape[1]):
+        col_p = pitches[:, frame_idx]
+        col_m = magnitudes[:, frame_idx]
+        idx = int(np.argmax(col_m))
+        if col_p[idx] > 0:
+            pitch_times.append(float(times[frame_idx]))
+            pitch_hz.append(float(col_p[idx]))
+
+    pitch_contour = _downsample_pitch_series(pitch_times, pitch_hz, MAX_SERIES_POINTS)
+
+    return {
+        "rms_envelope": rms_envelope,
+        "pitch_contour": pitch_contour,
+        "rms_threshold": RMS_THRESHOLD,
     }
 
 
@@ -98,9 +180,17 @@ def main() -> None:
     """CLI: print features JSON for an audio file."""
     parser = argparse.ArgumentParser(description="Extract HearBeat acoustic features")
     parser.add_argument("--audio", required=True, help="Path to wav/mp3 file")
+    parser.add_argument("--series", action="store_true", help="Include time series JSON")
     args = parser.parse_args()
     features = extract_features(args.audio)
-    print(json.dumps(features, ensure_ascii=False, indent=2))
+    if args.series:
+        payload: Dict[str, Any] = {
+            "features_json": features,
+            "series_json": extract_time_series(args.audio),
+        }
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        print(json.dumps(features, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
