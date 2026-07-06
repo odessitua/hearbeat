@@ -91,6 +91,7 @@
   }
   .pill.alert{background:var(--amber-tint); color:#8A5B12; border-color:#F0DBA8;}
   .pill.ok{background:var(--sage-tint); color:var(--deep2); border-color:#DCEBE2;}
+  .pill.brisk{background:#E8F5E0; color:#4A7A32; border-color:#C5E0B5;}
 
   .btn{
     font-family:inherit; font-weight:800; font-size:14.5px; cursor:pointer;
@@ -100,11 +101,10 @@
   .btn-primary{background:var(--coral); color:#fff; box-shadow:0 6px 16px rgba(226,119,91,.35);}
   .btn-primary:hover{background:var(--coral-dark);}
   .btn-call-cta{
-    background:transparent; color:var(--coral); box-shadow:none;
-    text-decoration:underline; text-underline-offset:4px;
-    padding:8px 4px; font-size:15px;
+    background:var(--coral); color:#fff; box-shadow:0 6px 16px rgba(226,119,91,.35);
+    text-decoration:none; padding:12px 22px; font-size:14.5px;
   }
-  .btn-call-cta:hover{background:transparent; color:var(--coral-dark);}
+  .btn-call-cta:hover{background:var(--coral-dark); color:#fff;}
   .btn-secondary{background:var(--sage-tint); color:var(--deep2); border:1px solid #DCEBE2;}
   .btn-secondary:hover{background:#E1F0E7;}
   .btn-ghost{background:transparent; color:var(--muted); border:1px solid var(--line);}
@@ -296,7 +296,36 @@
     background:var(--coral-tint); border:1px solid #F3D3C4; border-radius:14px;
     padding:12px 14px; font-weight:700; color:var(--coral-dark); font-size:14.5px;
   }
-  .modal .text-insight{grid-template-columns:1fr; gap:8px;}
+
+  /* Основний результат рушія — найбільш пріоритетна інформація */
+  .modal-hero{
+    text-align:center; padding:18px 16px; margin-bottom:16px;
+    background:linear-gradient(160deg, var(--sage-tint) 0%, #fff 100%);
+    border:1px solid #DCEBE2; border-radius:18px;
+  }
+  .modal-hero.alert{background:linear-gradient(160deg, var(--amber-tint) 0%, #fff 100%); border-color:#F0DBA8;}
+  .modal-hero .mh-lab{font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);}
+  .modal-hero .mh-num{font-size:48px; font-weight:900; line-height:1; margin:4px 0; color:var(--deep);}
+  .modal-hero.alert .mh-num{color:#8A5B12;}
+  .modal-hero .mh-note{font-size:13.5px; font-weight:700; color:var(--ink);}
+
+  .modal-summary-block{margin-bottom:14px;}
+  .modal-summary-block .lab{font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin-bottom:4px;}
+  .modal-summary-block .val{font-size:15.5px; line-height:1.5; color:var(--ink);}
+
+  /* Семантичний розбір LLM — допоміжна деталізація, тому візуально тихіша */
+  .modal-llm-details{margin-bottom:14px;}
+  .modal-llm-details summary{
+    cursor:pointer; font-size:12px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.04em; color:var(--muted); list-style:none; padding:2px 0;
+  }
+  .modal-llm-details summary::-webkit-details-marker{display:none;}
+  .modal-llm-details summary::before{content:"▸ "; }
+  .modal-llm-details[open] summary::before{content:"▾ "; }
+  .modal .text-insight{grid-template-columns:1fr; gap:6px; margin-top:8px;}
+  .modal .tibox{background:var(--paper); border-color:var(--line); padding:8px 10px;}
+  .modal .tibox .lab{color:var(--muted); font-size:11px;}
+  .modal .tibox .val{font-size:13px;}
 
   /* ---------- ENGINE TAB ---------- */
   .engine-tag{
@@ -546,19 +575,23 @@
     <h3 id="modalTitle">Деталі дзвінка</h3>
     <div class="modal-date" id="modalDate"></div>
 
-    <div class="modal-block">
-      <div class="lab">🎤 Оцінка голосу</div>
-      <div class="val" id="modalVoice"></div>
+    <div class="modal-hero" id="modalHero">
+      <div class="mh-lab">🎤 Acoustic index (голос)</div>
+      <div class="mh-num" id="modalIndex"></div>
+      <div class="mh-note" id="modalVoice"></div>
     </div>
-    <div class="modal-block">
-      <div class="lab">📝 Семантика (текст, LLM)</div>
-      <div id="modalSemantics"></div>
-    </div>
-    <div class="modal-block">
+
+    <div class="modal-summary-block">
       <div class="lab">💬 Про що розмова</div>
       <div class="val" id="modalSummary"></div>
     </div>
+
     <div class="modal-block modal-rec" id="modalRec"></div>
+
+    <details class="modal-llm-details">
+      <summary>Детальніше: семантика тексту (LLM)</summary>
+      <div id="modalSemantics"></div>
+    </details>
   </div>
 </div>
 
@@ -771,17 +804,12 @@ let history = [
     recommendation: 'Можливо, варто подзвонити сьогодні.',
   },
   {
-    date: daysAgo(-8), status: 'ok', voiceScore: 81,
-    summary: 'Онук подзвонив — настрій піднявся',
-    conversationAbout: 'Марія розповіла про дзвінок від онука: говорили про школу й літо. Голос звучав тепліше, ніж у попередні дні.',
-    excerpt: [
-      { who: 'HearBeat', text: 'Щось приємне сьогодні?' },
-      { who: 'Марія', text: 'Онук дзвонив, розповідав про школу.', user: true },
-      { who: 'HearBeat', text: 'Як настрій після розмови?' },
-      { who: 'Марія', text: 'Добре, порадував.', user: true },
-    ],
-    textInsight: { tone: 'позитивний / теплий', markers: '"онук", "порадував"', filler: '0 заповнювачів' },
-    recommendation: 'Все добре.',
+    date: daysAgo(-8), status: 'ok', voiceScore: 106,
+    summary: 'Онук подзвонив — голос бадьорий',
+    conversationAbout: 'Марія оживилась, розповідаючи про дзвінок онука — говорила про його навчання й плани на літо з помітною радістю в словах.',
+    excerpt: [],
+    textInsight: { tone: 'бадьорий / радісний', markers: '"онук", "порадував"', filler: '0 заповнювачів' },
+    recommendation: 'Чудовий настрій — особливих дій не потрібно.',
   },
   {
     date: daysAgo(-7), status: 'ok', voiceScore: 82,
@@ -797,33 +825,25 @@ let history = [
     recommendation: 'Звучить як зазвичай.',
   },
   {
-    date: daysAgo(-6), status: 'ok', voiceScore: 80,
-    summary: 'Погода гарна, трохи гуляла',
-    conversationAbout: 'Марія вийшла на подвір\'я подихати повітрям — сонячно, настрій легкий. Повернулась додому без втоми.',
-    excerpt: [
-      { who: 'HearBeat', text: 'Бували на вулиці?' },
-      { who: 'Марія', text: 'Так, трохи посиділа на лавці, сонечко.', user: true },
-      { who: 'HearBeat', text: 'Не втомились?' },
-      { who: 'Марія', text: 'Ні, нормально.', user: true },
-    ],
-    textInsight: { tone: 'легкий / позитивний', markers: '"сонечко", "нормально"', filler: '0 заповнювачів' },
-    recommendation: 'Все добре.',
+    date: daysAgo(-6), status: 'ok', voiceScore: 105,
+    summary: 'Гуляла на сонці — енергійніше',
+    conversationAbout: 'Марія із задоволенням розповіла про прогулянку на подвір\'ї — сонячна погода, розмова із сусідами. Тон розмови легкий і невимушений.',
+    excerpt: [],
+    textInsight: { tone: 'легкий / бадьорий', markers: '"сонечко", активна лексика', filler: '0 заповнювачів' },
+    recommendation: 'Бадьоріший день — все добре.',
   },
   {
-    date: daysAgo(-5), status: 'ok', voiceScore: 83,
-    summary: 'Бадьорий тон, все як завжди',
-    conversationAbout: 'Короткий чек-ін без особливих подій. Марія відповідала швидко, без довгих пауз — голос звучав бадьоріше за останній тиждень.',
-    excerpt: [
-      { who: 'HearBeat', text: 'Як справи?' },
-      { who: 'Марія', text: 'Добре, все як завжди, дякую.', user: true },
-    ],
-    textInsight: { tone: 'бадьорий / позитивний', markers: '"добре", "дякую"', filler: '0 заповнювачів' },
-    recommendation: 'Особливих дій не потрібно.',
+    date: daysAgo(-5), status: 'ok', voiceScore: 112,
+    summary: 'Дуже бадьорий день, говорила швидко',
+    conversationAbout: 'Коротка життєрадісна розмова без жодних скарг — Марія жартувала й розпитувала про справи родини.',
+    excerpt: [],
+    textInsight: { tone: 'бадьорий / життєрадісний', markers: 'жарти, розпитування про родину', filler: '0 заповнювачів' },
+    recommendation: 'Відмінний день — можна не турбуватись.',
   },
   {
     date: daysAgo(-4), status: 'alert', voiceScore: 57,
     summary: 'Голова болить, голос тихіший',
-    conversationAbout: 'Марія скаржилась на головний біль зранку. HearBeat уточнив — не виспала й мало їла. Темп мовлення нижчий, паузи довші за звичай.',
+    conversationAbout: 'Марія скаржилась на головний біль зранку. HearBeat уточнив — не виспала й мало їла.',
     excerpt: [
       { who: 'HearBeat', text: 'Як почуваєтесь?' },
       { who: 'Марія', text: 'Трохи голова болить зранку.', user: true },
@@ -836,7 +856,7 @@ let history = [
   {
     date: daysAgo(-3), status: 'ok', voiceScore: 79,
     summary: 'Краще після вчорашнього — відпочивала',
-    conversationAbout: 'Після вчорашнього дискомфорту Марія більше відпочивала. Голова не болить, але голос ще не зовсім «як завжди».',
+    conversationAbout: 'Після вчорашнього дискомфорту Марія розповіла, що більше відпочивала й зварила собі суп. Головний біль минув, але про самопочуття говорила обережніше, ніж зазвичай.',
     excerpt: [
       { who: 'HearBeat', text: 'Краще сьогодні?' },
       { who: 'Марія', text: 'Так, голова не болить, полежала.', user: true },
@@ -860,7 +880,7 @@ let history = [
   {
     date: daysAgo(-1), status: 'ok', voiceScore: 82,
     summary: 'Звичайний вечірній чек-ін',
-    conversationAbout: 'Рутинна розмова: день пройшов без подій, вечеряла, дивилась новини. Голос звучить як зазвичай.',
+    conversationAbout: 'Рутинна розмова без особливих подій: повечеряла, дивилась новини. Жодних тем для тривоги в розмові не було.',
     excerpt: [
       { who: 'HearBeat', text: 'Як минув день?' },
       { who: 'Марія', text: 'Звичайний, поїла, новини подивилась.', user: true },
@@ -1163,12 +1183,20 @@ function renderAdmin(){
   renderHistoryTable();
 }
 
+function voiceScoreNote(score, status){
+  if (status === 'alert') return 'нижче звичайного';
+  if (score > 105) return 'бадьоріше за звичай (вище бейзлайну)';
+  if (score > 100) return 'трохи вище бейзлайну';
+  return 'в межах норми';
+}
+
 function renderChart(){
   const wrap = document.getElementById('chartWrap');
   const w = 1080, h = 220, pad = 30;
   const scores = history.map(x => x.voiceScore);
-  const min = 40, max = 100;
+  const min = 40, max = 115;
   const stepX = (w - pad * 2) / (scores.length - 1);
+  const baselineY = h - pad - ((100 - min) / (max - min)) * (h - pad * 2);
 
   const pts = scores.map((s, i) => {
     const x = pad + i * stepX;
@@ -1180,8 +1208,9 @@ function renderChart(){
   const areaPath = `${linePath} L${pts[pts.length-1][0]},${h-pad} L${pts[0][0]},${h-pad} Z`;
 
   const circles = pts.map((p, i) => {
-    const alert = history[i].status === 'alert';
-    return `<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="${alert ? '#E7B978' : '#5E8C74'}" stroke="#fff" stroke-width="2"/>`;
+    const item = history[i];
+    const fill = item.status === 'alert' ? '#E7B978' : (item.voiceScore > 100 ? '#6BAF7F' : '#5E8C74');
+    return `<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="${fill}" stroke="#fff" stroke-width="2"/>`;
   }).join('');
 
   wrap.innerHTML = `
@@ -1192,6 +1221,8 @@ function renderChart(){
           <stop offset="100%" stop-color="#94C1A7" stop-opacity="0"/>
         </linearGradient>
       </defs>
+      <line x1="${pad}" y1="${baselineY}" x2="${w - pad}" y2="${baselineY}" stroke="#9A8F82" stroke-dasharray="5 5" stroke-width="1" opacity="0.55"/>
+      <text x="${pad + 4}" y="${baselineY - 5}" font-size="11" fill="#9A8F82" font-weight="700">100 · бейзлайн</text>
       <path d="${areaPath}" fill="url(#areaGrad)"/>
       <path d="${linePath}" fill="none" stroke="#5E8C74" stroke-width="3" stroke-linecap="round"/>
       ${circles}
@@ -1203,21 +1234,26 @@ function renderHistoryTable(){
   const rows = history.slice().reverse().slice(0, 10);
   body.innerHTML = rows.map((c, idx) => {
     const realIdx = history.length - 1 - idx;
-    const emo = c.status === 'alert' ? '😟' : '🙂';
+    const emo = c.status === 'alert' ? '😟' : (c.voiceScore > 100 ? '✨' : '🙂');
+    const pillCls = c.status === 'alert' ? 'alert' : (c.voiceScore > 100 ? 'brisk' : 'ok');
+    const pillText = c.status === 'alert' ? 'Увага' : (c.voiceScore > 100 ? 'Бадьоро' : 'Норма');
     return `
       <tr class="hrow" onclick="openModal(${realIdx})">
         <td>${fmtDate(c.date)}</td>
         <td><span class="emo">${emo}</span></td>
         <td>${truncate(c.summary, 54)}</td>
-        <td><span class="pill ${c.status === 'alert' ? 'alert' : 'ok'}">${c.status === 'alert' ? 'Увага' : 'Норма'}</span></td>
+        <td><span class="pill ${pillCls}">${pillText}</span></td>
       </tr>`;
   }).join('');
 }
 
 function openModal(idx){
   const c = history[idx];
+  const isAlert = c.status === 'alert';
   document.getElementById('modalDate').textContent = fmtDate(c.date, true);
-  document.getElementById('modalVoice').innerHTML = `Оцінка ${c.voiceScore}/100 ${c.status === 'alert' ? '— нижче звичайного' : '— в межах норми'}`;
+  document.getElementById('modalHero').className = `modal-hero ${isAlert ? 'alert' : ''}`;
+  document.getElementById('modalIndex').textContent = c.voiceScore;
+  document.getElementById('modalVoice').textContent = voiceScoreNote(c.voiceScore, c.status);
   document.getElementById('modalSemantics').innerHTML = textInsightHtml(c.textInsight);
   document.getElementById('modalSummary').textContent = c.conversationAbout;
   document.getElementById('modalRec').textContent = '💡 ' + c.recommendation;
