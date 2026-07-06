@@ -398,7 +398,7 @@
   <!-- ===================== TAB 1: CLIENT ===================== -->
   <section class="panel active" id="panel-client">
     <h1 class="page-title">Клієнт — простий вхідний дзвінок</h1>
-    <p class="page-sub">Марія, 72 роки. Єдина дія — натиснути «Відповісти». Нижче — приклад того, як цю розмову аналізує AI-рушій.</p>
+    <p class="page-sub">Марія, 72 роки. Єдина дія — натиснути «Відповісти». Це UI-демо розмови — адмінку не змінює.</p>
 
     <div class="phone-wrap">
       <div class="phone">
@@ -784,17 +784,6 @@ function finishCall(kind){
   callState.phase = 'done';
   renderPhone();
   renderTranscript(kind, callState.answers);
-
-  const s = SCENARIOS[kind];
-  history.push({
-    date: new Date(),
-    status: s.status,
-    voiceScore: s.voiceScore,
-    textScore: s.textScore,
-    summary: s.summary,
-    recommendation: s.recommendation,
-  });
-  showToast('Новий чек-ін додано до адмінки →');
 }
 
 function resetCall(){
@@ -1072,6 +1061,7 @@ function runUserCheck(){
 }
 
 renderEngineDemo();
+renderAdmin();
 
 /* ============================================================
    TOAST
