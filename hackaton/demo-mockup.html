@@ -185,6 +185,22 @@
   }
   .demo-scenario-row .btn{font-size:12.5px; padding:8px 14px;}
 
+  .dialogue-choices{display:flex; flex-direction:column; gap:10px; margin-top:14px; width:100%;}
+  .choice-btn{
+    text-align:left; padding:12px 14px; cursor:pointer; font-family:inherit;
+    background:#fff; border:2px solid var(--line); border-radius:14px;
+    transition:.12s ease; width:100%;
+  }
+  .choice-btn:hover{border-color:var(--teal); background:var(--sage-tint);}
+  .choice-btn:active{transform:scale(.98);}
+  .choice-btn .cb-label{font-weight:800; color:var(--deep2); font-size:14px; display:block;}
+  .choice-btn .cb-maria{font-size:12.5px; color:var(--muted); margin-top:5px; display:block; line-height:1.35;}
+  .choice-btn .cb-tag{
+    display:inline-block; font-size:10.5px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.03em; color:var(--coral-dark); background:var(--coral-tint);
+    padding:2px 8px; border-radius:999px; margin-bottom:4px;
+  }
+
   .done-check{font-size:56px; margin-bottom:10px;}
 
   .engine-preview{margin-top:6px;}
@@ -224,6 +240,12 @@
     font-weight:800; padding:5px 12px; border-radius:999px; margin-bottom:14px;
   }
 
+  pre.branch-map{
+    background:var(--paper); border:1px solid var(--line); border-radius:14px;
+    padding:14px 16px; font-size:12.5px; line-height:1.55; color:var(--ink);
+    font-family:'Nunito',sans-serif; margin:12px 0 0; white-space:pre-wrap;
+  }
+
   /* ---------- ADMIN TAB ---------- */
   .status-card{display:flex; align-items:center; gap:20px; flex-wrap:wrap;}
   .status-chip{
@@ -257,8 +279,9 @@
   }
   .modal-backdrop.open{display:flex;}
   .modal{
-    background:#fff; border-radius:24px; max-width:520px; width:100%;
+    background:#fff; border-radius:24px; max-width:560px; width:100%;
     padding:26px 28px; box-shadow:0 24px 60px rgba(0,0,0,.25); position:relative;
+    max-height:90vh; overflow-y:auto;
   }
   .modal-close{
     position:absolute; top:16px; right:18px; border:none; background:var(--paper);
@@ -273,6 +296,7 @@
     background:var(--coral-tint); border:1px solid #F3D3C4; border-radius:14px;
     padding:12px 14px; font-weight:700; color:var(--coral-dark); font-size:14.5px;
   }
+  .modal .text-insight{grid-template-columns:1fr; gap:8px;}
 
   /* ---------- ENGINE TAB ---------- */
   .engine-tag{
@@ -398,7 +422,7 @@
   <!-- ===================== TAB 1: CLIENT ===================== -->
   <section class="panel active" id="panel-client">
     <h1 class="page-title">Клієнт — простий вхідний дзвінок</h1>
-    <p class="page-sub">Марія, 72 роки. Єдина дія — натиснути «Відповісти». Це UI-демо розмови — адмінку не змінює.</p>
+    <p class="page-sub">Марія, 72 роки. Відповісти на дзвінок — і обрати репліку. Питання HearBeat підлаштовуються під контекст (демо для журі).</p>
 
     <div class="phone-wrap">
       <div class="phone">
@@ -412,6 +436,20 @@
       <details class="engine-preview" id="enginePreview" open>
         <summary>Приклад розмови й того, як її аналізує AI-рушій</summary>
         <div id="transcriptBox" style="margin-top:12px;"></div>
+      </details>
+      <details class="engine-preview" style="margin-top:14px;">
+        <summary>Карта гілок діалогу (що можна проклікати в телефоні)</summary>
+        <pre class="branch-map">Як минув день?
+├─ 🌤 Спокійний → Заходили гості?
+│   ├─ Сусідка → Поспілкувались? → ✓ норма
+│   └─ Тихо вдома → Настрій? → ✓ норма
+└─ 🌧 Втомилась → Через ніч чи важкий день? (уточнююче)
+    ├─ Не виспалась → Що турбує?
+    │   ├─ Голова болить → ⚠ тривога
+    │   └─ Просто втома → ⚠ легка тривога
+    └─ Мало сил → Щось приємне?
+        ├─ Онук дзвонив → ⚠ легка тривога
+        └─ Нічого особливого → ⚠ тривога</pre>
       </details>
     </div>
 
@@ -513,8 +551,8 @@
       <div class="val" id="modalVoice"></div>
     </div>
     <div class="modal-block">
-      <div class="lab">📝 Оцінка тексту</div>
-      <div class="val" id="modalText"></div>
+      <div class="lab">📝 Семантика (текст, LLM)</div>
+      <div id="modalSemantics"></div>
     </div>
     <div class="modal-block">
       <div class="lab">💬 Про що розмова</div>
@@ -530,21 +568,11 @@
 /* ============================================================
    DEMO DATA (mock, in-memory only — for UX iteration, no backend)
    ============================================================ */
-const QUESTIONS = [
-  'Як минув твій день?',
-  'Що цікавого сьогодні було?',
-  'Як ти себе почуваєш?',
-];
-
 const PHONE_ICON_SVG = `<svg class="phone-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`;
 
 const SCENARIOS = {
   normal: {
-    label: 'звичайний день',
     status: 'ok',
-    voiceScore: 82,
-    // текстова оцінка = те, що реально дістає LLM з транскрипту (емоційний фон,
-    // слова-маркери, заповнювачі), а не тон/темп голосу — це вже акустика
     textScore: 'Нейтрально-позитивний фон, побутова лексика, без слів тривоги',
     textInsight: {
       tone: 'спокійний / позитивний',
@@ -555,16 +583,9 @@ const SCENARIOS = {
     recommendation: 'Особливих дій не потрібно — все як завжди.',
     features: { tempo: 115, pause: 400, pitch: 30, energy: 0.045 },
     deltas: { tempo: '+0%', pause: '+0%', pitch: '+0%', energy: '+0%' },
-    answers: [
-      'День нормальний, була вдома.',
-      'Заходила сусідка, пили чай.',
-      'Почуваюсь добре, дякую.',
-    ],
   },
   tired: {
-    label: 'втомлений день',
     status: 'alert',
-    voiceScore: 55,
     textScore: 'Негативно забарвлені слова, більше невпевненості й заповнювачів',
     textInsight: {
       tone: 'занепокоєний / втомлений',
@@ -575,60 +596,279 @@ const SCENARIOS = {
     recommendation: 'Варто подзвонити ввечері особисто.',
     features: { tempo: 88, pause: 620, pitch: 21, energy: 0.028 },
     deltas: { tempo: '-24%', pause: '+55%', pitch: '-30%', energy: '-38%' },
-    answers: [
-      'Та якось... не дуже виспалась.',
-      'Нічого особливого, полежала більше.',
-      'Трохи голова болить, а так нічого.',
+  },
+  tired_mild: {
+    status: 'alert',
+    textScore: 'Легка втома в тексті, без гострих скарг',
+    textInsight: {
+      tone: 'пригнічений / втомлений',
+      markers: '"мало сил", "втомлена"',
+      filler: '2 заповнювачі — трохи вище норми',
+    },
+    summary: 'Марія скаржиться на втому без інших симптомів — варто уточнити особистим дзвінком.',
+    recommendation: 'Можливо, варто подзвонити сьогодні.',
+    features: { tempo: 94, pause: 520, pitch: 24, energy: 0.032 },
+    deltas: { tempo: '-12%', pause: '+28%', pitch: '-18%', energy: '-22%' },
+  },
+};
+
+const DIALOGUE_NODES = {
+  q_day: {
+    hb: 'Як минув твій день?',
+    choices: [
+      { label: 'Спокійний, вдома', maria: 'День нормальний, була вдома.', next: 'good_guest' },
+      { label: 'Втомилась', maria: 'Та якось... не дуже виспалась.', next: 'tired_why' },
     ],
   },
-};
-
-/* "Розумний дзвінок" (vision, не в MVP-демо) — приклад адаптивної розмови
-   з уточнюючим питанням, щоб показати куди росте рушій поза фіксованим сценарієм. */
-const SMART_CALL_EXAMPLE = {
-  badge: 'Приклад: адаптивний «розумний дзвінок» · vision, не поточний MVP-флоу',
-  dialogue: [
-    { who: 'HearBeat', text: 'Добрий день, Маріє! Це HearBeat — короткий чек-ін від Олени.' },
-    { who: 'Марія', text: 'Добрий день! Так, слухаю.', user: true },
-    { who: 'HearBeat', text: 'Як минув твій день?' },
-    { who: 'Марія', text: 'Та більше вдома сиділа, трохи втомлена.', user: true },
-    { who: 'HearBeat', text: 'Втомлена — це через погану ніч, чи просто важкий день?', followUp: true },
-    { who: 'Марія', text: 'Скоріше не виспалась, сусідка допізна шуміла.', user: true },
-    { who: 'HearBeat', text: 'Зрозуміло. А є щось приємне сьогодні, про що хочеш розказати?' },
-    { who: 'Марія', text: 'Онук дзвонив увечері, це підняло настрій.', user: true },
-    { who: 'HearBeat', text: 'Як добре! Дякую, Маріє. Гарного вечора — передам Олені.' },
-  ],
-  features: { tempo: 96, pause: 480, pitch: 24, energy: 0.034 },
-  deltas: { tempo: '-9%', pause: '+20%', pitch: '-14%', energy: '-15%' },
-  textInsight: {
-    tone: 'змішаний: втома → тепліше під кінець',
-    markers: '"не виспалась" (тривога), "підняло настрій" (позитив)',
-    filler: '2 заповнювачі — в межах норми',
+  good_guest: {
+    hb: 'Заходили до вас хтось сьогодні?',
+    choices: [
+      { label: 'Заходила сусідка', maria: 'Заходила сусідка, пили чай.', next: 'good_social' },
+      { label: 'Ні, тихо вдома', maria: 'Ні, тихенько, читала книжку.', next: 'good_quiet' },
+    ],
+  },
+  good_social: {
+    hb: 'Як приємно! Ви добре поспілкувались?',
+    choices: [
+      { label: 'Так, дуже приємно', maria: 'Так, дуже приємно, дякую.', next: 'end_normal' },
+    ],
+  },
+  good_quiet: {
+    hb: 'Зрозуміло. А настрій загалом як?',
+    choices: [
+      { label: 'Добре, спокійно', maria: 'Почуваюсь добре, дякую.', next: 'end_normal' },
+      { label: 'Трохи нудно', maria: 'Трохи нудно, але нічого страшного.', next: 'end_normal' },
+    ],
+  },
+  tired_why: {
+    hb: 'Чую вас. Це через погану ніч, чи просто важкий день?',
+    followUp: true,
+    choices: [
+      { label: 'Не виспалась', maria: 'Скоріше не виспалась, сусідка допізна шуміла.', next: 'tired_body' },
+      { label: 'Просто мало сил', maria: 'Просто мало сил сьогодні, нічого особливого.', next: 'tired_rest' },
+    ],
+  },
+  tired_body: {
+    hb: 'Зрозуміло. А є щось, що турбує — голова, суглоби?',
+    choices: [
+      { label: 'Трохи болить голова', maria: 'Трохи голова болить, а так нічого.', next: 'end_tired' },
+      { label: 'Ні, просто втома', maria: 'Ні, просто втомлена, полежала більше.', next: 'end_tired_mild' },
+    ],
+  },
+  tired_rest: {
+    hb: 'Може, варто сьогодні більше відпочити. Щось приємне було?',
+    choices: [
+      { label: 'Онук дзвонив', maria: 'Онук дзвонив увечері, це трохи підняло настрій.', next: 'end_tired_mild' },
+      { label: 'Нічого особливого', maria: 'Нічого особливого, полежала.', next: 'end_tired' },
+    ],
+  },
+  end_normal: {
+    end: true,
+    scenario: 'normal',
+    farewell: 'Чудово! Дякую, Маріє. Гарного вечора — передам Олені.',
+  },
+  end_tired: {
+    end: true,
+    scenario: 'tired',
+    farewell: 'Дякую, що розказали. Передам Олені — можливо, вона подзвонить ввечері. Гарного вечора!',
+  },
+  end_tired_mild: {
+    end: true,
+    scenario: 'tired_mild',
+    farewell: 'Дякую, Маріє. Відпочивайте. Передам Олені. Гарного вечора!',
   },
 };
 
-let history = [
-  d(-13, 'normal', 78), d(-12, 'normal', 79), d(-11, 'normal', 80),
-  d(-10, 'tired', 58, 'Скаржилась на втому, паузи довші на 40%.'),
-  d(-9, 'tired', 60, 'Ще трохи млява, але вже бадьоріше говорить.'),
-  d(-8, 'normal', 81), d(-7, 'normal', 82), d(-6, 'normal', 80),
-  d(-5, 'normal', 83), d(-4, 'tired', 57, 'Знову довші паузи й тихіший голос.'),
-  d(-3, 'normal', 79), d(-2, 'normal', 81), d(-1, 'normal', 82),
-];
+const DEFAULT_TRANSCRIPT_EXAMPLE = {
+  badge: 'Приклад діалогу · питання підлаштовуються під відповідь',
+  lines: [
+    { who: 'HearBeat', text: 'Добрий день, Маріє! Це HearBeat — короткий чек-ін від Олени.' },
+    { who: 'Марія', text: 'Добрий день! Так, слухаю.', user: true },
+    { who: 'HearBeat', text: 'Коротка розмова для родини, забере хвилину. Гаразд?' },
+    { who: 'Марія', text: 'Так, добре.', user: true },
+    { who: 'HearBeat', text: 'Як минув твій день?' },
+    { who: 'Марія', text: 'Та якось... не дуже виспалась.', user: true },
+    { who: 'HearBeat', text: 'Чую вас. Це через погану ніч, чи просто важкий день?', followUp: true },
+    { who: 'Марія', text: 'Скоріше не виспалась, сусідка допізна шуміла.', user: true },
+    { who: 'HearBeat', text: 'Зрозуміло. А є щось, що турбує — голова, суглоби?' },
+    { who: 'Марія', text: 'Трохи голова болить, а так нічого.', user: true },
+    { who: 'HearBeat', text: 'Дякую, що розказали. Передам Олені — можливо, вона подзвонить ввечері. Гарного вечора!' },
+  ],
+  scenario: 'tired',
+};
 
-function d(offsetDays, kind, score, customSummary){
+function daysAgo(n){
   const dt = new Date();
-  dt.setDate(dt.getDate() + offsetDays);
-  const s = SCENARIOS[kind];
-  return {
-    date: dt,
-    status: s.status,
-    voiceScore: score,
-    textScore: s.textScore,
-    summary: customSummary || s.summary,
-    recommendation: s.recommendation,
-  };
+  dt.setDate(dt.getDate() + n);
+  return dt;
 }
+
+/* Кожен чек-ін — унікальний зміст розмови + семантика для модалки */
+let history = [
+  {
+    date: daysAgo(-13), status: 'ok', voiceScore: 78,
+    summary: 'Спокійний день удома, без скарг',
+    conversationAbout: 'Марія розповіла про тихий день: прибрала квартиру, подивилась передачу. Настрій рівний, без тривожних тем.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Як минув день?' },
+      { who: 'Марія', text: 'Тихо, вдома, все нормально.', user: true },
+      { who: 'HearBeat', text: 'Заходили хтось?' },
+      { who: 'Марія', text: 'Ні, сама була.', user: true },
+    ],
+    textInsight: { tone: 'спокійний / рівний', markers: 'немає слів тривоги', filler: '0 заповнювачів' },
+    recommendation: 'Особливих дій не потрібно.',
+  },
+  {
+    date: daysAgo(-12), status: 'ok', voiceScore: 79,
+    summary: 'Заходила сусідка, пили чай',
+    conversationAbout: 'Марія з радістю згадала візит сусідки — разом пили чай і згадували онуків. Соціальний контакт підняв настрій.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Заходили до вас хтось?' },
+      { who: 'Марія', text: 'Так, сусідка заходила, пили чай.', user: true },
+      { who: 'HearBeat', text: 'Приємно поспілкувались?' },
+      { who: 'Марія', text: 'Так, дуже приємно.', user: true },
+    ],
+    textInsight: { tone: 'позитивний / теплий', markers: '"приємно", "чай"', filler: '1 заповнювач' },
+    recommendation: 'Все добре — можна не дзвонити сьогодні.',
+  },
+  {
+    date: daysAgo(-11), status: 'ok', voiceScore: 80,
+    summary: 'Сходила в магазин, почувається добре',
+    conversationAbout: 'Коротка розмова про побут: сходила в магазин за продуктами, ввечері дочитала книжку. Скарг на самопочуття немає.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Що робили сьогодні?' },
+      { who: 'Марія', text: 'Сходила в магазин, вечером читала.', user: true },
+      { who: 'HearBeat', text: 'Як почуваєтесь?' },
+      { who: 'Марія', text: 'Добре, дякую.', user: true },
+    ],
+    textInsight: { tone: 'нейтрально-позитивний', markers: 'побутова лексика, "добре"', filler: '1 заповнювач' },
+    recommendation: 'Звучить як зазвичай.',
+  },
+  {
+    date: daysAgo(-10), status: 'alert', voiceScore: 58,
+    summary: 'Скаржиться на втому, паузи довші',
+    conversationAbout: 'Марія одразу сказала, що мало спала. HearBeat уточнив причину — шум від сусідки вночі. Згадала втому, без інших симптомів.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Як минув день?' },
+      { who: 'Марія', text: 'Та якось... не дуже виспалась.', user: true },
+      { who: 'HearBeat', text: 'Це через погану ніч?', followUp: true },
+      { who: 'Марія', text: 'Сусідка допізна шуміла.', user: true },
+    ],
+    textInsight: { tone: 'втомлений / пригнічений', markers: '"не виспалась", "шуміла"', filler: '3 заповнювачі ("та", "якось")' },
+    recommendation: 'Варто подзвонити ввечері.',
+  },
+  {
+    date: daysAgo(-9), status: 'alert', voiceScore: 60,
+    summary: 'Ще втомлена, але трохи бадьоріше',
+    conversationAbout: 'Продовження вчорашньої теми: ніч була краща, але сил мало. Згадала, що онук обіцяв подзвонити — це трохи підбадьорило.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Краще поспали сьогодні?' },
+      { who: 'Марія', text: 'Трохи краще, але все одно втомлена.', user: true },
+      { who: 'HearBeat', text: 'Щось приємне було?' },
+      { who: 'Марія', text: 'Онук обіцяв подзвонити.', user: true },
+    ],
+    textInsight: { tone: 'змішаний: втома → тепліше під кінець', markers: '"втомлена" (тривога), "онук" (позитив)', filler: '2 заповнювачі' },
+    recommendation: 'Можливо, варто подзвонити сьогодні.',
+  },
+  {
+    date: daysAgo(-8), status: 'ok', voiceScore: 81,
+    summary: 'Онук подзвонив — настрій піднявся',
+    conversationAbout: 'Марія розповіла про дзвінок від онука: говорили про школу й літо. Голос звучав тепліше, ніж у попередні дні.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Щось приємне сьогодні?' },
+      { who: 'Марія', text: 'Онук дзвонив, розповідав про школу.', user: true },
+      { who: 'HearBeat', text: 'Як настрій після розмови?' },
+      { who: 'Марія', text: 'Добре, порадував.', user: true },
+    ],
+    textInsight: { tone: 'позитивний / теплий', markers: '"онук", "порадував"', filler: '0 заповнювачів' },
+    recommendation: 'Все добре.',
+  },
+  {
+    date: daysAgo(-7), status: 'ok', voiceScore: 82,
+    summary: 'Звичайний день, читала книжку',
+    conversationAbout: 'Спокійна розмова: більшість дня вдома, читала детектив. Не згадувала болю чи тривоги.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Як минув день?' },
+      { who: 'Марія', text: 'Нічого особливого, читала книжку.', user: true },
+      { who: 'HearBeat', text: 'Настрій як?' },
+      { who: 'Марія', text: 'Спокійно, нормально.', user: true },
+    ],
+    textInsight: { tone: 'спокійний', markers: 'немає тривоги', filler: '1 заповнювач' },
+    recommendation: 'Звучить як зазвичай.',
+  },
+  {
+    date: daysAgo(-6), status: 'ok', voiceScore: 80,
+    summary: 'Погода гарна, трохи гуляла',
+    conversationAbout: 'Марія вийшла на подвір\'я подихати повітрям — сонячно, настрій легкий. Повернулась додому без втоми.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Бували на вулиці?' },
+      { who: 'Марія', text: 'Так, трохи посиділа на лавці, сонечко.', user: true },
+      { who: 'HearBeat', text: 'Не втомились?' },
+      { who: 'Марія', text: 'Ні, нормально.', user: true },
+    ],
+    textInsight: { tone: 'легкий / позитивний', markers: '"сонечко", "нормально"', filler: '0 заповнювачів' },
+    recommendation: 'Все добре.',
+  },
+  {
+    date: daysAgo(-5), status: 'ok', voiceScore: 83,
+    summary: 'Бадьорий тон, все як завжди',
+    conversationAbout: 'Короткий чек-ін без особливих подій. Марія відповідала швидко, без довгих пауз — голос звучав бадьоріше за останній тиждень.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Як справи?' },
+      { who: 'Марія', text: 'Добре, все як завжди, дякую.', user: true },
+    ],
+    textInsight: { tone: 'бадьорий / позитивний', markers: '"добре", "дякую"', filler: '0 заповнювачів' },
+    recommendation: 'Особливих дій не потрібно.',
+  },
+  {
+    date: daysAgo(-4), status: 'alert', voiceScore: 57,
+    summary: 'Голова болить, голос тихіший',
+    conversationAbout: 'Марія скаржилась на головний біль зранку. HearBeat уточнив — не виспала й мало їла. Темп мовлення нижчий, паузи довші за звичай.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Як почуваєтесь?' },
+      { who: 'Марія', text: 'Трохи голова болить зранку.', user: true },
+      { who: 'HearBeat', text: 'Спали нормально?', followUp: true },
+      { who: 'Марія', text: 'Не дуже... і майже нічого не їла.', user: true },
+    ],
+    textInsight: { tone: 'стурбований / втомлений', markers: '"болить голова", "не їла"', filler: '2 заповнювачі' },
+    recommendation: 'Варто подзвонити сьогодні особисто.',
+  },
+  {
+    date: daysAgo(-3), status: 'ok', voiceScore: 79,
+    summary: 'Краще після вчорашнього — відпочивала',
+    conversationAbout: 'Після вчорашнього дискомфорту Марія більше відпочивала. Голова не болить, але голос ще не зовсім «як завжди».',
+    excerpt: [
+      { who: 'HearBeat', text: 'Краще сьогодні?' },
+      { who: 'Марія', text: 'Так, голова не болить, полежала.', user: true },
+      { who: 'HearBeat', text: 'Їли нормально?' },
+      { who: 'Марія', text: 'Так, суп зварила.', user: true },
+    ],
+    textInsight: { tone: 'спокійніший, ніж учора', markers: '"краще", "не болить"', filler: '1 заповнювач' },
+    recommendation: 'Ситуація покращується — наглядати.',
+  },
+  {
+    date: daysAgo(-2), status: 'ok', voiceScore: 81,
+    summary: 'Дзвінок від доньки підняв настрій',
+    conversationAbout: 'Олена подзвонила вдень — Марія згадала це з теплотою. Решта дня пройшла спокійно.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Що цікавого було?' },
+      { who: 'Марія', text: 'Олена дзвонила, приємно поговорили.', user: true },
+    ],
+    textInsight: { tone: 'теплий / позитивний', markers: '"приємно", ім\'я доньки', filler: '0 заповнювачів' },
+    recommendation: 'Все добре.',
+  },
+  {
+    date: daysAgo(-1), status: 'ok', voiceScore: 82,
+    summary: 'Звичайний вечірній чек-ін',
+    conversationAbout: 'Рутинна розмова: день пройшов без подій, вечеряла, дивилась новини. Голос звучить як зазвичай.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Як минув день?' },
+      { who: 'Марія', text: 'Звичайний, поїла, новини подивилась.', user: true },
+    ],
+    textInsight: { tone: 'нейтральний / спокійний', markers: 'побутові теми', filler: '0 заповнювачів' },
+    recommendation: 'Звучить як зазвичай.',
+  },
+];
 
 const DEMO_BASELINE = {
   tempo_bpm: 93.17,
@@ -688,9 +928,33 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 /* ============================================================
-   CLIENT TAB — call flow simulation
+   CLIENT TAB — dialogue tree simulation
    ============================================================ */
-let callState = { phase: 'ringing', qIndex: 0, scenario: 'normal', answers: [] };
+let callState = {
+  phase: 'ringing',
+  nodeId: 'q_day',
+  scenario: null,
+  transcript: [],
+  stepCount: 0,
+};
+
+const OPENING_LINES = [
+  { who: 'HearBeat', text: 'Добрий день, Маріє! Це HearBeat — короткий чек-ін від Олени.' },
+  { who: 'Марія', text: 'Добрий день! Так, слухаю.', user: true },
+];
+
+function currentNode(){
+  return DIALOGUE_NODES[callState.nodeId];
+}
+
+function dialogueProgressDots(){
+  const total = 4;
+  const done = Math.min(callState.stepCount, total - 1);
+  return Array.from({ length: total }, (_, i) => {
+    const cls = i < done ? 'done' : (i === done ? 'current' : '');
+    return `<span class="q-dot ${cls}"></span>`;
+  }).join('');
+}
 
 function renderPhone(){
   const el = document.getElementById('phoneScreen');
@@ -715,42 +979,44 @@ function renderPhone(){
         <div class="call-label">HearBeat</div>
         <p>Привіт, Маріє! Це коротка розмова для родини, забере хвилину. Гаразд?</p>
         <div class="consent-actions">
-          <button class="btn btn-primary btn-lg" style="justify-content:center;" onclick="startQuestions()">Так, добре</button>
+          <button class="btn btn-primary btn-lg" style="justify-content:center;" onclick="startDialogue()">Так, добре</button>
           <button class="btn btn-ghost" style="justify-content:center;" onclick="resetCall()">Не зараз</button>
         </div>
       </div>`;
     return;
   }
 
-  if (s.phase === 'questions'){
-    const dots = QUESTIONS.map((_, i) => {
-      const cls = i < s.qIndex ? 'done' : (i === s.qIndex ? 'current' : '');
-      return `<span class="q-dot ${cls}"></span>`;
-    }).join('');
+  if (s.phase === 'dialogue'){
+    const node = currentNode();
+    const choicesHtml = node.choices.map((c, i) => `
+      <button type="button" class="choice-btn" onclick="pickChoice(${i})">
+        <span class="cb-label">${c.label}</span>
+        <span class="cb-maria">«${c.maria}»</span>
+      </button>
+    `).join('');
+    const followTag = node.followUp ? ' <span class="pill ok" style="font-size:11px;vertical-align:middle;">уточнююче</span>' : '';
     el.innerHTML = `
       <div class="question-box">
-        <div class="q-progress">${dots}</div>
-        <div class="q-bubble">${QUESTIONS[s.qIndex]}</div>
-        <div class="rec-hint">Скажіть кілька слів у відповідь</div>
-        <div class="demo-scenario-row">
-          <button class="btn btn-secondary" onclick="answerDemo('normal')">🌤 Демо: гарний день</button>
-          <button class="btn btn-secondary" onclick="answerDemo('tired')">🌧 Демо: втомлений день</button>
-        </div>
+        <div class="q-progress">${dialogueProgressDots()}</div>
+        <div class="q-bubble">${node.hb}${followTag}</div>
+        <div class="rec-hint">Оберіть, що відповість Марія (голосом)</div>
+        <div class="dialogue-choices">${choicesHtml}</div>
       </div>`;
     return;
   }
 
   if (s.phase === 'recording'){
+    const lastHb = [...s.transcript].reverse().find(l => l.who === 'HearBeat');
     el.innerHTML = `
       <div class="question-box">
-        <div class="q-bubble">${QUESTIONS[s.qIndex]}</div>
+        <div class="q-bubble">${lastHb ? lastHb.text : ''}</div>
         <p class="rec-pulse"><span class="rec-dot"></span> Запис відповіді…</p>
       </div>`;
     return;
   }
 
   if (s.phase === 'done'){
-    const sc = SCENARIOS[s.scenario];
+    const sc = SCENARIOS[s.scenario] || SCENARIOS.normal;
     el.innerHTML = `
       <div class="done-check">${sc.status === 'ok' ? '💚' : '🧡'}</div>
       <div class="call-name" style="font-size:22px;">Дякуємо, Маріє!</div>
@@ -761,33 +1027,57 @@ function renderPhone(){
 }
 
 function answerCall(){ callState.phase = 'consent'; renderPhone(); }
-function declineCall(){ /* stays ringing on demo */ renderPhone(); }
-function startQuestions(){ callState.phase = 'questions'; callState.qIndex = 0; callState.answers = []; renderPhone(); }
+function declineCall(){ renderPhone(); }
 
-function answerDemo(kind){
-  callState.scenario = kind;
+function startDialogue(){
+  callState.phase = 'dialogue';
+  callState.nodeId = 'q_day';
+  callState.stepCount = 0;
+  callState.scenario = null;
+  callState.transcript = [
+    ...OPENING_LINES,
+    { who: 'HearBeat', text: 'Коротка розмова для родини, забере хвилину. Гаразд?' },
+    { who: 'Марія', text: 'Так, добре.', user: true },
+    { who: 'HearBeat', text: DIALOGUE_NODES.q_day.hb },
+  ];
+  renderPhone();
+}
+
+function pickChoice(index){
+  const node = currentNode();
+  const choice = node.choices[index];
+  callState.transcript.push({ who: 'Марія', text: choice.maria, user: true });
+  callState.stepCount += 1;
+
+  const next = DIALOGUE_NODES[choice.next];
+  if (next.end){
+    callState.transcript.push({ who: 'HearBeat', text: next.farewell });
+    callState.scenario = next.scenario;
+    callState.phase = 'recording';
+    renderPhone();
+    setTimeout(() => finishCall(next.scenario), 900);
+    return;
+  }
+
+  callState.transcript.push({ who: 'HearBeat', text: next.hb, followUp: next.followUp });
+  callState.nodeId = choice.next;
   callState.phase = 'recording';
   renderPhone();
   setTimeout(() => {
-    callState.answers.push(SCENARIOS[kind].answers[callState.qIndex]);
-    if (callState.qIndex < QUESTIONS.length - 1){
-      callState.qIndex += 1;
-      callState.phase = 'questions';
-      renderPhone();
-    } else {
-      finishCall(kind);
-    }
-  }, 1100);
+    callState.phase = 'dialogue';
+    renderPhone();
+  }, 900);
 }
 
-function finishCall(kind){
+function finishCall(scenarioKey){
   callState.phase = 'done';
+  callState.scenario = scenarioKey;
   renderPhone();
-  renderTranscript(kind, callState.answers);
+  renderTranscriptFromLines(callState.transcript, scenarioKey);
 }
 
 function resetCall(){
-  callState = { phase: 'ringing', qIndex: 0, scenario: 'normal', answers: [] };
+  callState = { phase: 'ringing', nodeId: 'q_day', scenario: null, transcript: [], stepCount: 0 };
   renderPhone();
 }
 
@@ -810,38 +1100,41 @@ function textInsightHtml(insight){
     </div>`;
 }
 
-function renderTranscript(kind, answers){
-  const s = SCENARIOS[kind];
+function renderTranscriptLines(lines, scenarioKey){
+  const sc = SCENARIOS[scenarioKey] || SCENARIOS.normal;
   const box = document.getElementById('transcriptBox');
   let html = '';
-  html += `<div class="transcript-line"><span class="who">HearBeat</span><span>Добрий день, Маріє! Це HearBeat — короткий чек-ін від Олени.</span></div>`;
-  html += `<div class="transcript-line user"><span class="who">Марія</span><span>Добрий день! Так, слухаю.</span></div>`;
-  QUESTIONS.forEach((q, i) => {
-    html += `<div class="transcript-line"><span class="who">HearBeat</span><span>${q}</span></div>`;
-    html += `<div class="transcript-line user"><span class="who">Марія</span><span>${answers[i] ?? s.answers[i]}</span></div>`;
+  lines.forEach(line => {
+    const cls = line.user ? 'transcript-line user' : 'transcript-line';
+    const tag = line.followUp ? ' <span class="pill ok" style="margin-left:6px;">уточнююче</span>' : '';
+    html += `<div class="${cls}"><span class="who">${line.who}</span><span>${line.text}${tag}</span></div>`;
   });
-  html += `<div class="transcript-line"><span class="who">HearBeat</span><span>Дякую, Маріє. Гарного вечора — передам Олені.</span></div>`;
   html += `<div class="insight-lab">🎤 Акустика (голос)</div>`;
-  html += featureBarsHtml(s.features, s.deltas);
+  html += featureBarsHtml(sc.features, sc.deltas);
   html += `<div class="insight-lab">📝 Семантика (текст, LLM)</div>`;
-  html += textInsightHtml(s.textInsight);
+  html += textInsightHtml(sc.textInsight);
   box.innerHTML = html;
   document.getElementById('enginePreview').open = true;
 }
 
+function renderTranscriptFromLines(lines, scenarioKey){
+  renderTranscriptLines(lines, scenarioKey);
+}
+
 function renderDefaultTranscript(){
+  const ex = DEFAULT_TRANSCRIPT_EXAMPLE;
   const box = document.getElementById('transcriptBox');
-  const ex = SMART_CALL_EXAMPLE;
   let html = `<div class="vision-badge">🧠 ${ex.badge}</div>`;
-  ex.dialogue.forEach(line => {
+  ex.lines.forEach(line => {
     const cls = line.user ? 'transcript-line user' : 'transcript-line';
-    const followUp = line.followUp ? ' <span class="pill ok" style="margin-left:6px;">уточнююче питання</span>' : '';
-    html += `<div class="${cls}"><span class="who">${line.who}</span><span>${line.text}${followUp}</span></div>`;
+    const tag = line.followUp ? ' <span class="pill ok" style="margin-left:6px;">уточнююче</span>' : '';
+    html += `<div class="${cls}"><span class="who">${line.who}</span><span>${line.text}${tag}</span></div>`;
   });
+  const sc = SCENARIOS[ex.scenario];
   html += `<div class="insight-lab">🎤 Акустика (голос)</div>`;
-  html += featureBarsHtml(ex.features, ex.deltas);
+  html += featureBarsHtml(sc.features, sc.deltas);
   html += `<div class="insight-lab">📝 Семантика (текст, LLM)</div>`;
-  html += textInsightHtml(ex.textInsight);
+  html += textInsightHtml(sc.textInsight);
   box.innerHTML = html;
 }
 
@@ -861,7 +1154,7 @@ function renderAdmin(){
     </div>
     <div class="status-meta">
       <div class="muted small">Сьогодні · ${fmtDate(latest.date)}</div>
-      <p class="rec">${latest.summary}</p>
+      <p class="rec">${latest.conversationAbout}</p>
     </div>
     <a class="btn btn-call-cta" href="tel:+380501234567">📞 Подзвонити</a>
   `;
@@ -925,8 +1218,8 @@ function openModal(idx){
   const c = history[idx];
   document.getElementById('modalDate').textContent = fmtDate(c.date, true);
   document.getElementById('modalVoice').innerHTML = `Оцінка ${c.voiceScore}/100 ${c.status === 'alert' ? '— нижче звичайного' : '— в межах норми'}`;
-  document.getElementById('modalText').textContent = c.textScore;
-  document.getElementById('modalSummary').textContent = c.summary;
+  document.getElementById('modalSemantics').innerHTML = textInsightHtml(c.textInsight);
+  document.getElementById('modalSummary').textContent = c.conversationAbout;
   document.getElementById('modalRec').textContent = '💡 ' + c.recommendation;
   document.getElementById('modalBackdrop').classList.add('open');
 }
