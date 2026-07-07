@@ -1,0 +1,1466 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HearBeat — демо-прототип v2 (замкнений шлях)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+  :root{
+    --deep:#5E8C74;
+    --deep2:#4C7761;
+    --teal:#94C1A7;
+    --coral:#E2775B;
+    --coral-dark:#C85F45;
+    --amber:#E7B978;
+    --green:#8FC1A0;
+    --paper:#FDF9F4;
+    --ink:#4A423A;
+    --muted:#9A8F82;
+    --line:#F0E6D9;
+    --card:#FFFFFF;
+    --sage-tint:#EBF4EE;
+    --coral-tint:#FBEAE2;
+    --amber-tint:#FBEFD8;
+    --shadow: 0 6px 20px rgba(150,130,100,.12);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito',-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:#EDE6DB;
+    min-height:100vh;
+  }
+
+  /* ---------- Top shell ---------- */
+  .shell{
+    max-width:1180px;
+    margin:0 auto;
+    padding:20px 20px 60px;
+  }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:18px; flex-wrap:wrap; gap:12px;
+  }
+  .brand{
+    font-weight:900; font-size:22px; color:var(--deep2);
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand .heart{color:var(--coral);}
+
+  .step-badge{
+    display:inline-flex; align-items:center; gap:8px; background:#fff; padding:6px 16px;
+    border-radius:999px; box-shadow:var(--shadow); border:1px solid var(--line);
+    font-weight:800; font-size:13px; color:var(--muted);
+  }
+  .step-badge .num{
+    display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
+    border-radius:50%; background:var(--deep); color:#fff; font-size:11.5px;
+  }
+
+  /* ---------- Одна вертикальна сцена замість вкладок ---------- */
+  .stage{margin-bottom:34px;}
+  .stage.hidden-stage{display:none;}
+  .stage.shown{animation:fadeIn .45s ease;}
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  .stage-divider{
+    display:flex; align-items:center; gap:12px; margin:0 0 18px; color:var(--muted);
+    font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em;
+  }
+  .stage-divider::before, .stage-divider::after{content:""; flex:1; height:1px; background:var(--line);}
+
+  .engine-details{
+    background:var(--card); border:1px solid var(--line); border-radius:22px;
+    padding:0; box-shadow:var(--shadow); margin-bottom:18px; overflow:hidden;
+  }
+  .engine-details-summary{
+    cursor:pointer; list-style:none; padding:20px 24px; font-weight:800; font-size:15.5px;
+    color:var(--deep2); display:flex; align-items:center; gap:10px;
+  }
+  .engine-details-summary::-webkit-details-marker{display:none;}
+  .engine-details-summary::before{content:"▸"; transition:.15s; color:var(--muted); font-size:13px;}
+  .engine-details[open] .engine-details-summary::before{transform:rotate(90deg);}
+  .engine-details-body{padding:0 24px 24px;}
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:22px;
+    padding:22px 24px; box-shadow:var(--shadow); margin-bottom:18px;
+  }
+  h1.page-title{font-size:22px; margin:0 0 4px; color:var(--deep2); font-weight:900;}
+  p.page-sub{margin:0 0 18px; color:var(--muted); font-size:14.5px;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  @media(max-width:860px){ .grid2,.grid3{grid-template-columns:1fr;} }
+
+  .pill{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--sage-tint); color:var(--deep2);
+    border:1px solid #DCEBE2; border-radius:999px;
+    padding:4px 12px; font-size:12.5px; font-weight:700;
+  }
+  .pill.alert{background:var(--amber-tint); color:#8A5B12; border-color:#F0DBA8;}
+  .pill.ok{background:var(--sage-tint); color:var(--deep2); border-color:#DCEBE2;}
+  .pill.brisk{background:#E8F5E0; color:#4A7A32; border-color:#C5E0B5;}
+
+  .btn{
+    font-family:inherit; font-weight:800; font-size:14.5px; cursor:pointer;
+    border-radius:999px; border:none; padding:12px 22px;
+    transition:.15s ease; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary{background:var(--coral); color:#fff; box-shadow:0 6px 16px rgba(226,119,91,.35);}
+  .btn-primary:hover{background:var(--coral-dark);}
+  .btn-call-cta{
+    background:var(--coral); color:#fff; box-shadow:0 6px 16px rgba(226,119,91,.35);
+    text-decoration:none; padding:12px 22px; font-size:14.5px;
+  }
+  .btn-call-cta:hover{background:var(--coral-dark); color:#fff;}
+  .btn-secondary{background:var(--sage-tint); color:var(--deep2); border:1px solid #DCEBE2;}
+  .btn-secondary:hover{background:#E1F0E7;}
+  .btn-ghost{background:transparent; color:var(--muted); border:1px solid var(--line);}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn-lg{padding:16px 30px; font-size:16px;}
+
+  .muted{color:var(--muted);}
+  .small{font-size:12.5px;}
+
+  /* ---------- CLIENT TAB ---------- */
+  .phone-wrap{display:flex; justify-content:center; margin-bottom:18px;}
+  .phone{
+    width:340px; min-height:560px; background:linear-gradient(160deg,#3C4B43,#2C3830);
+    border-radius:42px; padding:14px; box-shadow:0 20px 40px rgba(30,30,20,.35);
+    position:relative;
+  }
+  .phone-screen{
+    background:var(--paper); border-radius:30px; height:100%; min-height:532px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:32px 22px; text-align:center; position:relative; overflow:hidden;
+  }
+  .phone-screen::before{
+    content:""; position:absolute; width:260px; height:260px; border-radius:50%;
+    background:radial-gradient(circle, rgba(226,119,91,.14), rgba(226,119,91,0) 70%);
+    top:-90px; right:-90px;
+  }
+  .call-label{font-size:13px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; font-weight:700;}
+  .call-name{font-size:30px; font-weight:900; color:var(--deep2); margin:10px 0 2px;}
+  .call-sub{font-size:15px; color:var(--muted); margin:0 0 40px;}
+  .avatar-ring{
+    width:110px; height:110px; border-radius:50%; background:var(--sage-tint);
+    display:flex; align-items:center; justify-content:center; font-size:46px;
+    margin-bottom:18px; border:3px solid #fff; box-shadow:0 8px 20px rgba(94,140,116,.25);
+  }
+  .call-actions{display:flex; gap:26px; margin-top:auto; position:relative; z-index:1;}
+  .round-btn{
+    width:64px; height:64px; border-radius:50%; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:26px; color:#fff;
+    box-shadow:0 8px 18px rgba(0,0,0,.18); transition:.15s ease;
+  }
+  .round-btn:active{transform:scale(.94);}
+  .btn-decline{background:#D9604A;}
+  .btn-answer{background:var(--deep); animation:pulse 1.6s infinite;}
+  .btn-answer .phone-icon{
+    width:28px; height:28px; stroke:#fff; fill:none;
+    stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(94,140,116,.5);}
+    70%{box-shadow:0 0 0 16px rgba(94,140,116,0);}
+    100%{box-shadow:0 0 0 0 rgba(94,140,116,0);}
+  }
+
+  .consent-box{padding:10px 4px;}
+  .consent-box p{font-size:15.5px; line-height:1.5; color:var(--ink);}
+  .consent-actions{display:flex; flex-direction:column; gap:12px; width:100%; margin-top:20px;}
+
+  .question-box{width:100%; padding:6px 2px;}
+  .q-progress{display:flex; gap:6px; justify-content:center; margin-bottom:22px;}
+  .q-dot{width:8px; height:8px; border-radius:50%; background:var(--line);}
+  .q-dot.done{background:var(--teal);}
+  .q-dot.current{background:var(--coral);}
+  .q-bubble{
+    background:#fff; border:1px solid var(--line); border-radius:18px 18px 18px 4px;
+    padding:16px 18px; font-size:16.5px; font-weight:700; color:var(--deep2);
+    margin-bottom:22px; box-shadow:0 4px 12px rgba(94,140,116,.1);
+  }
+  .rec-hint{font-size:13px; color:var(--muted); margin-bottom:14px;}
+  .rec-pulse{
+    display:inline-flex; align-items:center; gap:8px; color:var(--coral-dark); font-weight:800;
+    font-size:14.5px;
+  }
+  .rec-dot{width:10px; height:10px; border-radius:50%; background:var(--coral); animation:blink 1s infinite;}
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+
+  .demo-scenario-row{
+    display:flex; gap:10px; justify-content:center; margin-top:16px; flex-wrap:wrap;
+  }
+  .demo-scenario-row .btn{font-size:12.5px; padding:8px 14px;}
+
+  .dialogue-choices{display:flex; flex-direction:column; gap:10px; margin-top:14px; width:100%;}
+  .choice-btn{
+    text-align:left; padding:12px 14px; cursor:pointer; font-family:inherit;
+    background:#fff; border:2px solid var(--line); border-radius:14px;
+    transition:.12s ease; width:100%;
+  }
+  .choice-btn:hover{border-color:var(--teal); background:var(--sage-tint);}
+  .choice-btn:active{transform:scale(.98);}
+  .choice-btn .cb-label{font-weight:800; color:var(--deep2); font-size:14px; display:block;}
+  .choice-btn .cb-maria{font-size:12.5px; color:var(--muted); margin-top:5px; display:block; line-height:1.35;}
+  .choice-btn .cb-tag{
+    display:inline-block; font-size:10.5px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.03em; color:var(--coral-dark); background:var(--coral-tint);
+    padding:2px 8px; border-radius:999px; margin-bottom:4px;
+  }
+
+  .done-check{font-size:56px; margin-bottom:10px;}
+
+  .transcript-line{display:flex; gap:10px; margin:10px 0; font-size:14.5px; line-height:1.4;}
+  .transcript-line .who{font-weight:800; min-width:78px; color:var(--deep2);}
+  .transcript-line.user .who{color:var(--coral-dark);}
+  .feature-bars{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:10px;}
+  .fbar{background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:10px 12px; text-align:center;}
+  .fbar .lab{font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.03em;}
+  .fbar .val{font-size:17px; font-weight:900; color:var(--deep2); margin-top:2px;}
+  .fbar .delta{font-size:11.5px; margin-top:2px; font-weight:700;}
+  .fbar .delta.up{color:var(--deep2);}
+  .fbar .delta.down{color:var(--coral-dark);}
+
+  .insight-lab{
+    font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--muted); margin:18px 0 4px;
+  }
+  .text-insight{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:10px;}
+  @media(max-width:640px){ .text-insight{grid-template-columns:1fr;} }
+  .tibox{
+    background:var(--coral-tint); border:1px solid #F3D3C4; border-radius:14px;
+    padding:10px 12px;
+  }
+  .tibox .lab{font-size:11.5px; font-weight:800; color:var(--coral-dark); margin-bottom:3px;}
+  .tibox .val{font-size:13.5px; color:var(--ink); line-height:1.35;}
+
+  /* ---------- ADMIN TAB ---------- */
+  .status-card{display:flex; align-items:center; gap:20px; flex-wrap:wrap;}
+  .status-chip{
+    display:inline-flex; align-items:center; gap:10px; font-weight:900; font-size:16px;
+    padding:10px 20px; border-radius:999px;
+  }
+  .status-chip .d{width:11px; height:11px; border-radius:50%;}
+  .status-chip.ok{background:var(--sage-tint); color:var(--deep2);}
+  .status-chip.ok .d{background:var(--teal);}
+  .status-chip.alert{background:var(--amber-tint); color:#8A5B12;}
+  .status-chip.alert .d{background:var(--amber);}
+  .status-meta{flex:1; min-width:220px;}
+  .status-meta .rec{font-weight:800; color:var(--ink); margin:6px 0 0; font-size:15px;}
+
+  .chart-wrap{padding-top:6px;}
+  svg.trend text{font-family:'Nunito',sans-serif;}
+
+  .history-table{width:100%; border-collapse:collapse; font-size:14.5px;}
+  .history-table th{
+    text-align:left; color:var(--muted); font-weight:800; font-size:12px;
+    text-transform:uppercase; letter-spacing:.04em; padding:8px 10px; border-bottom:2px solid var(--line);
+  }
+  .history-table td{padding:12px 10px; border-bottom:1px solid var(--line);}
+  .history-table tr.hrow{cursor:pointer; transition:.12s ease;}
+  .history-table tr.hrow:hover{background:var(--paper);}
+  .emo{font-size:19px;}
+
+  .history-table tr.row-new{animation:rowFlash 1.6s ease 2;}
+  @keyframes rowFlash{
+    0%,100%{background:transparent;}
+    50%{background:var(--coral-tint);}
+  }
+
+  .status-card.pulse-flash{animation:statusFlash 1.6s ease 1;}
+  @keyframes statusFlash{
+    0%{box-shadow:var(--shadow);}
+    30%{box-shadow:0 0 0 6px rgba(226,119,91,.28), var(--shadow);}
+    100%{box-shadow:var(--shadow);}
+  }
+
+  .modal-backdrop{
+    display:none; position:fixed; inset:0; background:rgba(40,34,28,.45);
+    align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:#fff; border-radius:24px; max-width:560px; width:100%;
+    padding:26px 28px; box-shadow:0 24px 60px rgba(0,0,0,.25); position:relative;
+    max-height:90vh; overflow-y:auto;
+  }
+  .modal-close{
+    position:absolute; top:16px; right:18px; border:none; background:var(--paper);
+    width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:15px; color:var(--muted);
+  }
+  .modal h3{margin:0 0 4px; color:var(--deep2); font-size:19px;}
+  .modal .modal-date{color:var(--muted); font-size:13px; margin-bottom:16px;}
+  .modal-block{margin-bottom:14px;}
+  .modal-block .lab{font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin-bottom:4px;}
+  .modal-block .val{font-size:15px; line-height:1.45;}
+  .modal-rec{
+    background:var(--coral-tint); border:1px solid #F3D3C4; border-radius:14px;
+    padding:12px 14px; font-weight:700; color:var(--coral-dark); font-size:14.5px;
+  }
+
+  /* Основний результат рушія — найбільш пріоритетна інформація */
+  .modal-hero{
+    text-align:center; padding:18px 16px; margin-bottom:16px;
+    background:linear-gradient(160deg, var(--sage-tint) 0%, #fff 100%);
+    border:1px solid #DCEBE2; border-radius:18px;
+  }
+  .modal-hero.alert{background:linear-gradient(160deg, var(--amber-tint) 0%, #fff 100%); border-color:#F0DBA8;}
+  .modal-hero .mh-lab{font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);}
+  .modal-hero .mh-num{font-size:48px; font-weight:900; line-height:1; margin:4px 0; color:var(--deep);}
+  .modal-hero.alert .mh-num{color:#8A5B12;}
+  .modal-hero .mh-note{font-size:13.5px; font-weight:700; color:var(--ink);}
+
+  .modal-summary-block{margin-bottom:14px;}
+  .modal-summary-block .lab{font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin-bottom:4px;}
+  .modal-summary-block .val{font-size:15.5px; line-height:1.5; color:var(--ink);}
+
+  /* Семантичний розбір LLM — допоміжна деталізація, тому візуально тихіша */
+  .modal-llm-details{margin-bottom:14px;}
+  .modal-llm-details summary{
+    cursor:pointer; font-size:12px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.04em; color:var(--muted); list-style:none; padding:2px 0;
+  }
+  .modal-llm-details summary::-webkit-details-marker{display:none;}
+  .modal-llm-details summary::before{content:"▸ "; }
+  .modal-llm-details[open] summary::before{content:"▾ "; }
+  .modal .text-insight{grid-template-columns:1fr; gap:6px; margin-top:8px;}
+  .modal .tibox{background:var(--paper); border-color:var(--line); padding:8px 10px;}
+  .modal .tibox .lab{color:var(--muted); font-size:11px;}
+  .modal .tibox .val{font-size:13px;}
+
+  /* ---------- ENGINE TAB ---------- */
+  .engine-tag{
+    display:inline-block; background:var(--ink); color:#F0E9DE; font-size:11px; font-weight:800;
+    padding:3px 10px; border-radius:6px; letter-spacing:.04em; margin-bottom:10px;
+  }
+  .engine-section-title{margin:0 0 4px; font-size:16.5px; color:var(--deep2); font-weight:900;}
+  .engine-divider{
+    height:1px; background:var(--line); margin:6px 0 20px;
+  }
+
+  .demo-voices{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:16px 0 20px;}
+  @media(max-width:720px){ .demo-voices{grid-template-columns:1fr;} }
+
+  .demo-voice-card{
+    background:var(--paper); border:2px solid var(--line); border-radius:18px;
+    padding:16px 14px; cursor:pointer; transition:.15s ease; position:relative;
+  }
+  .demo-voice-card:hover{border-color:var(--teal); background:#fff;}
+  .demo-voice-card.active{border-color:var(--deep); background:#fff; box-shadow:0 8px 22px rgba(94,140,116,.18);}
+  .demo-voice-card .dv-top{display:flex; align-items:flex-start; justify-content:space-between; gap:8px;}
+  .demo-voice-card .dv-name{font-weight:800; font-size:14px; color:var(--deep2); line-height:1.3;}
+  .demo-voice-card .dv-file{font-size:11px; color:var(--muted); font-family:monospace; margin-top:4px;}
+  .demo-voice-card .dv-index{
+    font-size:22px; font-weight:900; line-height:1; margin-top:12px;
+  }
+  .demo-voice-card .dv-index.ref{color:var(--deep);}
+  .demo-voice-card .dv-index.low{color:var(--coral-dark);}
+  .demo-voice-card .dv-index.high{color:#5A8A3C;}
+  .demo-voice-card .dv-index-lab{font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
+  .demo-voice-card .play-mini{
+    width:34px; height:34px; border-radius:50%; border:none; background:var(--deep); color:#fff;
+    font-size:12px; cursor:pointer; flex-shrink:0;
+  }
+  .demo-voice-card .play-mini:hover{background:var(--deep2);}
+
+  .index-hero{
+    text-align:center; padding:22px 16px; margin-bottom:18px;
+    background:linear-gradient(160deg, var(--sage-tint) 0%, #fff 100%);
+    border:1px solid #DCEBE2; border-radius:20px;
+  }
+  .index-hero .ih-lab{font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);}
+  .index-hero .ih-num{
+    font-size:72px; font-weight:900; line-height:1; margin:6px 0;
+    transition:.2s ease;
+  }
+  .index-hero .ih-num.ref{color:var(--deep);}
+  .index-hero .ih-num.low{color:var(--coral-dark);}
+  .index-hero .ih-num.high{color:#5A8A3C;}
+  .index-hero .ih-ref{font-size:13px; color:var(--muted); font-weight:700;}
+  .index-hero .ih-delta{font-size:15px; font-weight:700; color:var(--ink); margin-top:8px; max-width:480px; margin-left:auto; margin-right:auto;}
+
+  .demo-features{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  .demo-feat{
+    background:var(--paper); border:1px solid var(--line); border-radius:12px;
+    padding:10px 12px; display:flex; justify-content:space-between; align-items:center;
+  }
+  .demo-feat .flab{font-size:12px; font-weight:700; color:var(--muted);}
+  .demo-feat .fval{font-size:15px; font-weight:900; color:var(--deep2);}
+
+  audio{display:none;}
+
+  pre.json-box{
+    background:#2C3830; color:#DCEFE2; border-radius:14px; padding:16px 18px;
+    font-size:13px; line-height:1.6; overflow-x:auto; font-family:'SFMono-Regular',Consolas,monospace;
+    margin:0;
+  }
+  pre.json-box .k{color:#94C1A7;}
+  pre.json-box .v{color:#E7B978;}
+
+  .record-actions{display:flex; gap:12px; flex-wrap:wrap; margin:16px 0;}
+  .record-actions .btn{flex:1; min-width:200px; justify-content:center;}
+
+  .user-panel{
+    margin-top:16px; padding-top:16px; border-top:1px solid var(--line);
+  }
+  .user-panel.empty .user-panel-body{display:none;}
+  .check-result{
+    margin-top:14px; padding:14px 16px; border-radius:16px;
+    background:var(--amber-tint); border:1px solid #F0DBA8;
+  }
+  .check-result .cr-index{font-size:28px; font-weight:900; color:#8A5B12;}
+  .check-result.ok{background:var(--sage-tint); border-color:#DCEBE2;}
+  .check-result.ok .cr-index{color:var(--deep2);}
+  .check-result.alert{background:var(--coral-tint); border-color:#F3D3C4;}
+  .check-result.alert .cr-index{color:var(--coral-dark);}
+
+  .rec-pulse-inline{
+    display:inline-flex; align-items:center; gap:8px; color:var(--deep2); font-weight:800; font-size:14px;
+  }
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--deep2); color:#fff; padding:12px 22px; border-radius:999px;
+    font-weight:700; font-size:14px; box-shadow:0 10px 24px rgba(0,0,0,.25);
+    opacity:0; pointer-events:none; transition:.25s ease; z-index:100;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .disclaimer{
+    text-align:center; color:var(--muted); font-size:12.5px; margin-top:10px; line-height:1.5;
+  }
+
+  .stagenote{
+    display:inline-flex; align-items:center; gap:6px; background:var(--coral-tint); color:var(--coral-dark);
+    font-size:11.5px; font-weight:800; padding:3px 10px; border-radius:999px; margin-left:8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="topbar">
+    <div class="brand">HearBeat <span class="heart">♥</span></div>
+    <div class="step-badge"><span class="num">1</span> Дзвінок → аналіз → сигнал сім'ї</div>
+  </div>
+
+  <!-- ===================== STAGE 1: ДЗВІНОК ===================== -->
+  <section class="stage" id="stageCall">
+    <h1 class="page-title">Вхідний дзвінок HearBeat</h1>
+    <p class="page-sub">Марія, 72 роки. Натисніть «Відповісти» і проведіть короткий чек-ін — питання підлаштовуються під те, що вибере Марія.</p>
+
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-screen" id="phoneScreen">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </div>
+
+    <p class="disclaimer">HearBeat не ставить діагнозів і не замінює лікаря. Це сімейний сигнал між вашими дзвінками.</p>
+  </section>
+
+  <!-- ===================== STAGE 2: АНАЛІЗ ГОЛОСУ (з'являється після дзвінка) ===================== -->
+  <section class="stage hidden-stage" id="stageAnalysis">
+    <div class="stage-divider">Що сталося з вашим голосом щойно</div>
+    <h1 class="page-title">🎤 Аналіз — на ваших очах</h1>
+    <p class="page-sub">Порівнюємо не з нормою «для літніх людей», а з тим, як зазвичай звучить САМЕ Марія.</p>
+
+    <div class="card">
+      <div class="index-hero" id="callIndexHero"></div>
+      <div class="insight-lab">Акустичні ознаки цього дзвінка</div>
+      <div id="callFeatureBars"></div>
+      <div class="insight-lab" style="margin-top:16px;">Семантика розмови (LLM)</div>
+      <div id="callTextInsight"></div>
+    </div>
+
+    <div style="text-align:center; margin-top:8px;">
+      <button type="button" class="btn btn-primary btn-lg" onclick="revealFamilySignal()">Ось що побачить Олена →</button>
+    </div>
+  </section>
+
+  <!-- ===================== STAGE 3: ДАШБОРД РОДИНИ (з'являється після кліку) ===================== -->
+  <section class="stage hidden-stage" id="stageFamily">
+    <div class="stage-divider">Сигнал, який отримує родина</div>
+    <h1 class="page-title">Дашборд для родини</h1>
+    <p class="page-sub">Олена (донька) · останні чек-іни Марії — з'явився новий рядок від щойно проведеного дзвінка.</p>
+
+    <div class="card status-card" id="statusCard">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 14px; font-size:16.5px; color:var(--deep2);">Тренд самопочуття</h2>
+      <div class="chart-wrap" id="chartWrap"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 14px; font-size:16.5px; color:var(--deep2);">Історія дзвінків</h2>
+      <table class="history-table">
+        <thead>
+          <tr><th>Дата</th><th>Емоція</th><th>Коротко</th><th></th></tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+
+    <p class="disclaimer">HearBeat не ставить діагнозів і не замінює лікаря. Це сімейний сигнал між вашими дзвінками.</p>
+  </section>
+
+  <!-- ===================== ПІД КАПОТОМ: акустичне ядро (для технічних суддів) ===================== -->
+  <details class="engine-details" id="engineDetails">
+    <summary class="engine-details-summary">Під капотом: акустичне ядро (для технічних суддів)</summary>
+    <div class="engine-details-body">
+      <p class="muted small" style="margin:0 0 16px;">Демо на передзаписаних голосах і окремо — запис свого бейзлайну для перевірки. Це той самий рушій, що щойно оцінив дзвінок Марії вище.</p>
+
+      <div class="card">
+        <span class="engine-tag">ДЕМО</span>
+        <h2 class="engine-section-title">Передзаписані голоси</h2>
+        <p class="muted small" style="margin:0 0 4px;">Оберіть сценарій — acoustic index і ознаки оновляться. 100 = еталонний бейзлайн.</p>
+
+        <div class="demo-voices" id="demoVoices"></div>
+
+        <div class="index-hero" id="demoIndexHero"></div>
+
+        <div class="grid2">
+          <div>
+            <div class="insight-lab">Ознаки обраного запису</div>
+            <div class="demo-features" id="demoFeatures"></div>
+          </div>
+          <div>
+            <div class="insight-lab">Бейзлайн (еталон, JSON)</div>
+            <pre class="json-box" id="demoBaselineJson"></pre>
+            <p class="muted small" style="margin-top:8px;">Усі демо-порівняння йдуть проти цього профілю.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="engine-divider"></div>
+
+      <div class="card">
+        <span class="engine-tag" style="background:var(--deep2);">СВІЙ БЕЙЗЛАЙН</span>
+        <h2 class="engine-section-title">Запис і перевірка</h2>
+        <p class="muted small" style="margin:0;">Спочатку запишіть свій голос як еталон (індекс 100), потім — перевірку для порівняння з ним.</p>
+
+        <div class="record-actions">
+          <button type="button" class="btn btn-primary" id="btnRecordBaseline" onclick="recordUserBaseline()">🎙 Записати бейзлайн</button>
+          <button type="button" class="btn btn-secondary" id="btnUserCheck" onclick="runUserCheck()" disabled>🔍 Перевірка</button>
+        </div>
+
+        <div class="user-panel empty" id="userPanel">
+          <div class="user-panel-body">
+            <div class="insight-lab">Ваш збережений бейзлайн</div>
+            <pre class="json-box" id="userBaselineJson"></pre>
+          </div>
+          <div id="userCheckResult"></div>
+        </div>
+      </div>
+
+      <audio id="audioNormal" src="../HearBeat/web/public/demo-audio/normal_response.wav"></audio>
+      <audio id="audioTired" src="../HearBeat/web/public/demo-audio/tired_response.wav"></audio>
+
+      <p class="disclaimer">Технічний контур: акустика (temp, паузи, pitch) + персональний бейзлайн → acoustic index + сімейне summary.</p>
+    </div>
+  </details>
+
+</div>
+
+<!-- Modal for call detail -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle">Деталі дзвінка</h3>
+    <div class="modal-date" id="modalDate"></div>
+
+    <div class="modal-hero" id="modalHero">
+      <div class="mh-lab">🎤 Acoustic index (голос)</div>
+      <div class="mh-num" id="modalIndex"></div>
+      <div class="mh-note" id="modalVoice"></div>
+    </div>
+
+    <div class="modal-summary-block">
+      <div class="lab">💬 Про що розмова</div>
+      <div class="val" id="modalSummary"></div>
+    </div>
+
+    <div class="modal-block modal-rec" id="modalRec"></div>
+
+    <details class="modal-llm-details" id="modalExcerptDetails">
+      <summary>Уривок розмови</summary>
+      <div id="modalExcerpt" style="margin-top:8px;"></div>
+    </details>
+
+    <details class="modal-llm-details">
+      <summary>Детальніше: семантика тексту (LLM)</summary>
+      <div id="modalSemantics"></div>
+    </details>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   DEMO DATA (mock, in-memory only — for UX iteration, no backend)
+   ============================================================ */
+const PHONE_ICON_SVG = `<svg class="phone-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`;
+
+const SCENARIOS = {
+  normal: {
+    status: 'ok',
+    voiceScore: 84,
+    shortSummary: 'Спокійний день, без скарг',
+    textScore: 'Нейтрально-позитивний фон, побутова лексика, без слів тривоги',
+    textInsight: {
+      tone: 'спокійний / позитивний',
+      markers: 'немає слів-тривоги, є "добре", "дякую"',
+      filler: '1 заповнювач (типово: 1–2)',
+    },
+    summary: 'Марія розповіла про звичайний день удома, ходила по магазинах, почувається добре.',
+    recommendation: 'Особливих дій не потрібно — все як завжди.',
+    features: { tempo: 115, pause: 400, pitch: 30, energy: 0.045 },
+    deltas: { tempo: '+0%', pause: '+0%', pitch: '+0%', energy: '+0%' },
+  },
+  tired: {
+    status: 'alert',
+    voiceScore: 58,
+    shortSummary: 'Скаржиться на втому, голова болить',
+    textScore: 'Негативно забарвлені слова, більше невпевненості й заповнювачів',
+    textInsight: {
+      tone: 'занепокоєний / втомлений',
+      markers: '"не виспалась", "болить голова"',
+      filler: '4 заповнювачі ("та", "якось", "ну") — вище типового',
+    },
+    summary: 'Марія згадала, що погано спала і трохи болить голова, темп мовлення помітно нижчий.',
+    recommendation: 'Варто подзвонити ввечері особисто.',
+    features: { tempo: 88, pause: 620, pitch: 21, energy: 0.028 },
+    deltas: { tempo: '-24%', pause: '+55%', pitch: '-30%', energy: '-38%' },
+  },
+  tired_mild: {
+    status: 'alert',
+    voiceScore: 68,
+    shortSummary: 'Мало сил, але без гострих скарг',
+    textScore: 'Легка втома в тексті, без гострих скарг',
+    textInsight: {
+      tone: 'пригнічений / втомлений',
+      markers: '"мало сил", "втомлена"',
+      filler: '2 заповнювачі — трохи вище норми',
+    },
+    summary: 'Марія скаржиться на втому без інших симптомів — варто уточнити особистим дзвінком.',
+    recommendation: 'Можливо, варто подзвонити сьогодні.',
+    features: { tempo: 94, pause: 520, pitch: 24, energy: 0.032 },
+    deltas: { tempo: '-12%', pause: '+28%', pitch: '-18%', energy: '-22%' },
+  },
+};
+
+const DIALOGUE_NODES = {
+  q_day: {
+    hb: 'Як минув твій день?',
+    choices: [
+      { label: 'Спокійний, вдома', maria: 'День нормальний, була вдома.', next: 'good_guest' },
+      { label: 'Втомилась', maria: 'Та якось... не дуже виспалась.', next: 'tired_why' },
+    ],
+  },
+  good_guest: {
+    hb: 'Заходили до вас хтось сьогодні?',
+    choices: [
+      { label: 'Заходила сусідка', maria: 'Заходила сусідка, пили чай.', next: 'good_social' },
+      { label: 'Ні, тихо вдома', maria: 'Ні, тихенько, читала книжку.', next: 'good_quiet' },
+    ],
+  },
+  good_social: {
+    hb: 'Як приємно! Ви добре поспілкувались?',
+    choices: [
+      { label: 'Так, дуже приємно', maria: 'Так, дуже приємно, дякую.', next: 'end_normal' },
+    ],
+  },
+  good_quiet: {
+    hb: 'Зрозуміло. А настрій загалом як?',
+    choices: [
+      { label: 'Добре, спокійно', maria: 'Почуваюсь добре, дякую.', next: 'end_normal' },
+      { label: 'Трохи нудно', maria: 'Трохи нудно, але нічого страшного.', next: 'end_normal' },
+    ],
+  },
+  tired_why: {
+    hb: 'Чую вас. Це через погану ніч, чи просто важкий день?',
+    followUp: true,
+    choices: [
+      { label: 'Не виспалась', maria: 'Скоріше не виспалась, сусідка допізна шуміла.', next: 'tired_body' },
+      { label: 'Просто мало сил', maria: 'Просто мало сил сьогодні, нічого особливого.', next: 'tired_rest' },
+    ],
+  },
+  tired_body: {
+    hb: 'Зрозуміло. А є щось, що турбує — голова, суглоби?',
+    choices: [
+      { label: 'Трохи болить голова', maria: 'Трохи голова болить, а так нічого.', next: 'end_tired' },
+      { label: 'Ні, просто втома', maria: 'Ні, просто втомлена, полежала більше.', next: 'end_tired_mild' },
+    ],
+  },
+  tired_rest: {
+    hb: 'Може, варто сьогодні більше відпочити. Щось приємне було?',
+    choices: [
+      { label: 'Онук дзвонив', maria: 'Онук дзвонив увечері, це трохи підняло настрій.', next: 'end_tired_mild' },
+      { label: 'Нічого особливого', maria: 'Нічого особливого, полежала.', next: 'end_tired' },
+    ],
+  },
+  end_normal: {
+    end: true,
+    scenario: 'normal',
+    farewell: 'Чудово! Дякую, Маріє. Гарного вечора — передам Олені.',
+  },
+  end_tired: {
+    end: true,
+    scenario: 'tired',
+    farewell: 'Дякую, що розказали. Передам Олені — можливо, вона подзвонить ввечері. Гарного вечора!',
+  },
+  end_tired_mild: {
+    end: true,
+    scenario: 'tired_mild',
+    farewell: 'Дякую, Маріє. Відпочивайте. Передам Олені. Гарного вечора!',
+  },
+};
+
+function daysAgo(n){
+  const dt = new Date();
+  dt.setDate(dt.getDate() + n);
+  return dt;
+}
+
+/* Кожен чек-ін — унікальний зміст розмови + семантика для модалки */
+let history = [
+  {
+    date: daysAgo(-13), status: 'ok', voiceScore: 78,
+    summary: 'Спокійний день удома, без скарг',
+    conversationAbout: 'Марія розповіла про тихий день: прибрала квартиру, подивилась передачу. Настрій рівний, без тривожних тем.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Як минув день?' },
+      { who: 'Марія', text: 'Тихо, вдома, все нормально.', user: true },
+      { who: 'HearBeat', text: 'Заходили хтось?' },
+      { who: 'Марія', text: 'Ні, сама була.', user: true },
+    ],
+    textInsight: { tone: 'спокійний / рівний', markers: 'немає слів тривоги', filler: '0 заповнювачів' },
+    recommendation: 'Особливих дій не потрібно.',
+  },
+  {
+    date: daysAgo(-12), status: 'ok', voiceScore: 79,
+    summary: 'Заходила сусідка, пили чай',
+    conversationAbout: 'Марія з радістю згадала візит сусідки — разом пили чай і згадували онуків. Соціальний контакт підняв настрій.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Заходили до вас хтось?' },
+      { who: 'Марія', text: 'Так, сусідка заходила, пили чай.', user: true },
+      { who: 'HearBeat', text: 'Приємно поспілкувались?' },
+      { who: 'Марія', text: 'Так, дуже приємно.', user: true },
+    ],
+    textInsight: { tone: 'позитивний / теплий', markers: '"приємно", "чай"', filler: '1 заповнювач' },
+    recommendation: 'Все добре — можна не дзвонити сьогодні.',
+  },
+  {
+    date: daysAgo(-11), status: 'ok', voiceScore: 80,
+    summary: 'Сходила в магазин, почувається добре',
+    conversationAbout: 'Коротка розмова про побут: сходила в магазин за продуктами, ввечері дочитала книжку. Скарг на самопочуття немає.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Що робили сьогодні?' },
+      { who: 'Марія', text: 'Сходила в магазин, вечером читала.', user: true },
+      { who: 'HearBeat', text: 'Як почуваєтесь?' },
+      { who: 'Марія', text: 'Добре, дякую.', user: true },
+    ],
+    textInsight: { tone: 'нейтрально-позитивний', markers: 'побутова лексика, "добре"', filler: '1 заповнювач' },
+    recommendation: 'Звучить як зазвичай.',
+  },
+  {
+    date: daysAgo(-10), status: 'alert', voiceScore: 58,
+    summary: 'Скаржиться на втому, паузи довші',
+    conversationAbout: 'Марія одразу сказала, що мало спала. HearBeat уточнив причину — шум від сусідки вночі. Згадала втому, без інших симптомів.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Як минув день?' },
+      { who: 'Марія', text: 'Та якось... не дуже виспалась.', user: true },
+      { who: 'HearBeat', text: 'Це через погану ніч?', followUp: true },
+      { who: 'Марія', text: 'Сусідка допізна шуміла.', user: true },
+    ],
+    textInsight: { tone: 'втомлений / пригнічений', markers: '"не виспалась", "шуміла"', filler: '3 заповнювачі ("та", "якось")' },
+    recommendation: 'Варто подзвонити ввечері.',
+  },
+  {
+    date: daysAgo(-9), status: 'alert', voiceScore: 60,
+    summary: 'Ще втомлена, але трохи бадьоріше',
+    conversationAbout: 'Продовження вчорашньої теми: ніч була краща, але сил мало. Згадала, що онук обіцяв подзвонити — це трохи підбадьорило.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Краще поспали сьогодні?' },
+      { who: 'Марія', text: 'Трохи краще, але все одно втомлена.', user: true },
+      { who: 'HearBeat', text: 'Щось приємне було?' },
+      { who: 'Марія', text: 'Онук обіцяв подзвонити.', user: true },
+    ],
+    textInsight: { tone: 'змішаний: втома → тепліше під кінець', markers: '"втомлена" (тривога), "онук" (позитив)', filler: '2 заповнювачі' },
+    recommendation: 'Можливо, варто подзвонити сьогодні.',
+  },
+  {
+    date: daysAgo(-8), status: 'ok', voiceScore: 106,
+    summary: 'Онук подзвонив — голос бадьорий',
+    conversationAbout: 'Марія оживилась, розповідаючи про дзвінок онука — говорила про його навчання й плани на літо з помітною радістю в словах.',
+    excerpt: [],
+    textInsight: { tone: 'бадьорий / радісний', markers: '"онук", "порадував"', filler: '0 заповнювачів' },
+    recommendation: 'Чудовий настрій — особливих дій не потрібно.',
+  },
+  {
+    date: daysAgo(-7), status: 'ok', voiceScore: 82,
+    summary: 'Звичайний день, читала книжку',
+    conversationAbout: 'Спокійна розмова: більшість дня вдома, читала детектив. Не згадувала болю чи тривоги.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Як минув день?' },
+      { who: 'Марія', text: 'Нічого особливого, читала книжку.', user: true },
+      { who: 'HearBeat', text: 'Настрій як?' },
+      { who: 'Марія', text: 'Спокійно, нормально.', user: true },
+    ],
+    textInsight: { tone: 'спокійний', markers: 'немає тривоги', filler: '1 заповнювач' },
+    recommendation: 'Звучить як зазвичай.',
+  },
+  {
+    date: daysAgo(-6), status: 'ok', voiceScore: 105,
+    summary: 'Гуляла на сонці — енергійніше',
+    conversationAbout: 'Марія із задоволенням розповіла про прогулянку на подвір\'ї — сонячна погода, розмова із сусідами. Тон розмови легкий і невимушений.',
+    excerpt: [],
+    textInsight: { tone: 'легкий / бадьорий', markers: '"сонечко", активна лексика', filler: '0 заповнювачів' },
+    recommendation: 'Бадьоріший день — все добре.',
+  },
+  {
+    date: daysAgo(-5), status: 'ok', voiceScore: 112,
+    summary: 'Дуже бадьорий день, говорила швидко',
+    conversationAbout: 'Коротка життєрадісна розмова без жодних скарг — Марія жартувала й розпитувала про справи родини.',
+    excerpt: [],
+    textInsight: { tone: 'бадьорий / життєрадісний', markers: 'жарти, розпитування про родину', filler: '0 заповнювачів' },
+    recommendation: 'Відмінний день — можна не турбуватись.',
+  },
+  {
+    date: daysAgo(-4), status: 'alert', voiceScore: 57,
+    summary: 'Голова болить, голос тихіший',
+    conversationAbout: 'Марія скаржилась на головний біль зранку. HearBeat уточнив — не виспала й мало їла.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Як почуваєтесь?' },
+      { who: 'Марія', text: 'Трохи голова болить зранку.', user: true },
+      { who: 'HearBeat', text: 'Спали нормально?', followUp: true },
+      { who: 'Марія', text: 'Не дуже... і майже нічого не їла.', user: true },
+    ],
+    textInsight: { tone: 'стурбований / втомлений', markers: '"болить голова", "не їла"', filler: '2 заповнювачі' },
+    recommendation: 'Варто подзвонити сьогодні особисто.',
+  },
+  {
+    date: daysAgo(-3), status: 'ok', voiceScore: 79,
+    summary: 'Краще після вчорашнього — відпочивала',
+    conversationAbout: 'Після вчорашнього дискомфорту Марія розповіла, що більше відпочивала й зварила собі суп. Головний біль минув, але про самопочуття говорила обережніше, ніж зазвичай.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Краще сьогодні?' },
+      { who: 'Марія', text: 'Так, голова не болить, полежала.', user: true },
+      { who: 'HearBeat', text: 'Їли нормально?' },
+      { who: 'Марія', text: 'Так, суп зварила.', user: true },
+    ],
+    textInsight: { tone: 'спокійніший, ніж учора', markers: '"краще", "не болить"', filler: '1 заповнювач' },
+    recommendation: 'Ситуація покращується — наглядати.',
+  },
+  {
+    date: daysAgo(-2), status: 'ok', voiceScore: 81,
+    summary: 'Дзвінок від доньки підняв настрій',
+    conversationAbout: 'Олена подзвонила вдень — Марія згадала це з теплотою. Решта дня пройшла спокійно.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Що цікавого було?' },
+      { who: 'Марія', text: 'Олена дзвонила, приємно поговорили.', user: true },
+    ],
+    textInsight: { tone: 'теплий / позитивний', markers: '"приємно", ім\'я доньки', filler: '0 заповнювачів' },
+    recommendation: 'Все добре.',
+  },
+  {
+    date: daysAgo(-1), status: 'ok', voiceScore: 82,
+    summary: 'Звичайний вечірній чек-ін',
+    conversationAbout: 'Рутинна розмова без особливих подій: повечеряла, дивилась новини. Жодних тем для тривоги в розмові не було.',
+    excerpt: [
+      { who: 'HearBeat', text: 'Як минув день?' },
+      { who: 'Марія', text: 'Звичайний, поїла, новини подивилась.', user: true },
+    ],
+    textInsight: { tone: 'нейтральний / спокійний', markers: 'побутові теми', filler: '0 заповнювачів' },
+    recommendation: 'Звучить як зазвичай.',
+  },
+];
+
+const DEMO_BASELINE = {
+  tempo_bpm: 93.17,
+  pause_mean_ms: 314.52,
+  pitch_std_hz: 229.92,
+  energy_rms: 0.0266,
+};
+
+const ENGINE_DEMOS = {
+  baseline: {
+    id: 'baseline',
+    name: 'Базовий · звичайний день',
+    file: 'normal_response.wav',
+    audio: 'normal',
+    index: 100,
+    indexClass: 'ref',
+    delta: 'Голос звучить як зазвичай — це еталон бейзлайну',
+    features: { tempo_bpm: 93.17, pause_mean_ms: 314.52, pitch_std_hz: 229.92, energy_rms: 0.0266 },
+  },
+  tired: {
+    id: 'tired',
+    name: 'Втомлений день',
+    file: 'tired_response.wav',
+    audio: 'tired',
+    index: 78,
+    indexClass: 'low',
+    delta: 'Темп нижчий на 24%, паузи довші на 55% — нижче бейзлайну',
+    features: { tempo_bpm: 71.0, pause_mean_ms: 488.0, pitch_std_hz: 178.0, energy_rms: 0.019 },
+  },
+  brisk: {
+    id: 'brisk',
+    name: 'Бадьорий день',
+    file: 'normal_response.wav (швидший темп)',
+    audio: 'normal',
+    index: 112,
+    indexClass: 'high',
+    delta: 'Темп вищий на 12%, енергія вище на 18% — бадьоріше за звичай',
+    features: { tempo_bpm: 104.0, pause_mean_ms: 268.0, pitch_std_hz: 248.0, energy_rms: 0.031 },
+  },
+};
+
+let activeDemoId = 'baseline';
+let userBaseline = null;
+let userCheckBusy = false;
+
+/* ============================================================
+   ЗОЛОТИЙ ШЛЯХ: одна сцена, що розкривається за кроками
+   ============================================================ */
+function showStage(id){
+  const el = document.getElementById(id);
+  el.classList.remove('hidden-stage');
+  el.classList.add('shown');
+}
+
+function scrollToStage(id){
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ============================================================
+   CLIENT TAB — dialogue tree simulation
+   ============================================================ */
+let callState = {
+  phase: 'ringing',
+  nodeId: 'q_day',
+  scenario: null,
+  transcript: [],
+  stepCount: 0,
+};
+
+const OPENING_LINES = [
+  { who: 'HearBeat', text: 'Добрий день, Маріє! Це HearBeat — короткий чек-ін від Олени.' },
+  { who: 'Марія', text: 'Добрий день! Так, слухаю.', user: true },
+];
+
+function currentNode(){
+  return DIALOGUE_NODES[callState.nodeId];
+}
+
+function dialogueProgressDots(){
+  const total = 4;
+  const done = Math.min(callState.stepCount, total - 1);
+  return Array.from({ length: total }, (_, i) => {
+    const cls = i < done ? 'done' : (i === done ? 'current' : '');
+    return `<span class="q-dot ${cls}"></span>`;
+  }).join('');
+}
+
+function renderPhone(){
+  const el = document.getElementById('phoneScreen');
+  const s = callState;
+
+  if (s.phase === 'ringing'){
+    el.innerHTML = `
+      <div class="call-label">Вхідний дзвінок</div>
+      <div class="avatar-ring">💚</div>
+      <div class="call-name">HearBeat</div>
+      <div class="call-sub">Сімейний чек-ін від Олени</div>
+      <div class="call-actions">
+        <button class="round-btn btn-decline" onclick="declineCall()">✕</button>
+        <button class="round-btn btn-answer" onclick="answerCall()" aria-label="Відповісти">${PHONE_ICON_SVG}</button>
+      </div>`;
+    return;
+  }
+
+  if (s.phase === 'consent'){
+    el.innerHTML = `
+      <div class="consent-box">
+        <div class="call-label">HearBeat</div>
+        <p>Привіт, Маріє! Це коротка розмова для родини, забере хвилину. Гаразд?</p>
+        <div class="consent-actions">
+          <button class="btn btn-primary btn-lg" style="justify-content:center;" onclick="startDialogue()">Так, добре</button>
+          <button class="btn btn-ghost" style="justify-content:center;" onclick="resetCall()">Не зараз</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (s.phase === 'dialogue'){
+    const node = currentNode();
+    const choicesHtml = node.choices.map((c, i) => `
+      <button type="button" class="choice-btn" onclick="pickChoice(${i})">
+        <span class="cb-label">${c.label}</span>
+        <span class="cb-maria">«${c.maria}»</span>
+      </button>
+    `).join('');
+    const followTag = node.followUp ? ' <span class="pill ok" style="font-size:11px;vertical-align:middle;">уточнююче</span>' : '';
+    el.innerHTML = `
+      <div class="question-box">
+        <div class="q-progress">${dialogueProgressDots()}</div>
+        <div class="q-bubble">${node.hb}${followTag}</div>
+        <div class="rec-hint">Оберіть, що відповість Марія (голосом)</div>
+        <div class="dialogue-choices">${choicesHtml}</div>
+      </div>`;
+    return;
+  }
+
+  if (s.phase === 'recording'){
+    const lastHb = [...s.transcript].reverse().find(l => l.who === 'HearBeat');
+    el.innerHTML = `
+      <div class="question-box">
+        <div class="q-bubble">${lastHb ? lastHb.text : ''}</div>
+        <p class="rec-pulse"><span class="rec-dot"></span> Запис відповіді…</p>
+      </div>`;
+    return;
+  }
+
+  if (s.phase === 'done'){
+    const sc = SCENARIOS[s.scenario] || SCENARIOS.normal;
+    el.innerHTML = `
+      <div class="done-check">${sc.status === 'ok' ? '💚' : '🧡'}</div>
+      <div class="call-name" style="font-size:22px;">Дякуємо, Маріє!</div>
+      <div class="call-sub">Розмову передано родині. Дивіться нижче ↓</div>
+      <button class="btn btn-ghost" style="margin-top:18px;" onclick="resetCall()">Новий дзвінок</button>`;
+    return;
+  }
+}
+
+function answerCall(){ callState.phase = 'consent'; renderPhone(); }
+function declineCall(){ renderPhone(); }
+
+function startDialogue(){
+  callState.phase = 'dialogue';
+  callState.nodeId = 'q_day';
+  callState.stepCount = 0;
+  callState.scenario = null;
+  callState.transcript = [
+    ...OPENING_LINES,
+    { who: 'HearBeat', text: 'Коротка розмова для родини, забере хвилину. Гаразд?' },
+    { who: 'Марія', text: 'Так, добре.', user: true },
+    { who: 'HearBeat', text: DIALOGUE_NODES.q_day.hb },
+  ];
+  renderPhone();
+}
+
+function pickChoice(index){
+  const node = currentNode();
+  const choice = node.choices[index];
+  callState.transcript.push({ who: 'Марія', text: choice.maria, user: true });
+  callState.stepCount += 1;
+
+  const next = DIALOGUE_NODES[choice.next];
+  if (next.end){
+    callState.transcript.push({ who: 'HearBeat', text: next.farewell });
+    callState.scenario = next.scenario;
+    callState.phase = 'recording';
+    renderPhone();
+    setTimeout(() => finishCall(next.scenario), 450);
+    return;
+  }
+
+  callState.transcript.push({ who: 'HearBeat', text: next.hb, followUp: next.followUp });
+  callState.nodeId = choice.next;
+  callState.phase = 'recording';
+  renderPhone();
+  setTimeout(() => {
+    callState.phase = 'dialogue';
+    renderPhone();
+  }, 450);
+}
+
+function finishCall(scenarioKey){
+  callState.phase = 'done';
+  callState.scenario = scenarioKey;
+  renderPhone();
+  addHistoryEntryFromCall(scenarioKey, callState.transcript);
+  renderCallAnalysis(scenarioKey);
+  showStage('stageAnalysis');
+  setTimeout(() => scrollToStage('stageAnalysis'), 350);
+}
+
+/* Витягуємо змістовну частину діалогу (без вітання/консенту й прощання) —
+   саме ці 2–3 обміни репліками стають "excerpt" нового рядка історії. */
+function buildExcerptFromTranscript(transcript){
+  const meaningful = transcript.slice(4, transcript.length - 1);
+  return meaningful.slice(-4);
+}
+
+/* Перетворює щойно пройдений судею шлях діалогу на новий рядок сімейної історії —
+   той самий запис, який мала б згенерувати ML-обробка голосу й тексту дзвінка. */
+function addHistoryEntryFromCall(scenarioKey, transcript){
+  const sc = SCENARIOS[scenarioKey] || SCENARIOS.normal;
+  history.forEach(item => { item.isNew = false; });
+  history.push({
+    date: daysAgo(0),
+    status: sc.status,
+    voiceScore: sc.voiceScore,
+    summary: sc.shortSummary,
+    conversationAbout: sc.summary,
+    excerpt: buildExcerptFromTranscript(transcript),
+    textInsight: sc.textInsight,
+    recommendation: sc.recommendation,
+    isNew: true,
+  });
+  renderAdmin();
+}
+
+/* Замикає золотий шлях "голос → сигнал сім'ї": розкриває дашборд родини
+   на тому ж екрані (без перемикання вкладок) і підсвічує новий рядок. */
+function revealFamilySignal(){
+  renderAdmin();
+  showStage('stageFamily');
+  scrollToStage('stageFamily');
+  const statusCard = document.getElementById('statusCard');
+  statusCard.classList.add('pulse-flash');
+  setTimeout(() => statusCard.classList.remove('pulse-flash'), 1800);
+  showToast('✓ Дзвінок додано до сімейного сигналу');
+}
+
+function resetCall(){
+  callState = { phase: 'ringing', nodeId: 'q_day', scenario: null, transcript: [], stepCount: 0 };
+  renderPhone();
+  ['stageAnalysis', 'stageFamily'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.add('hidden-stage');
+    el.classList.remove('shown');
+  });
+  scrollToStage('stageCall');
+}
+
+function featureBarsHtml(features, deltas){
+  return `
+    <div class="feature-bars">
+      <div class="fbar"><div class="lab">Темп</div><div class="val">${features.tempo}</div><div class="delta ${deltas.tempo.startsWith('-') ? 'down' : 'up'}">${deltas.tempo}</div></div>
+      <div class="fbar"><div class="lab">Паузи</div><div class="val">${features.pause}мс</div><div class="delta ${deltas.pause.startsWith('-') ? 'up' : 'down'}">${deltas.pause}</div></div>
+      <div class="fbar"><div class="lab">Pitch σ</div><div class="val">${features.pitch}</div><div class="delta ${deltas.pitch.startsWith('-') ? 'down' : 'up'}">${deltas.pitch}</div></div>
+      <div class="fbar"><div class="lab">Енергія</div><div class="val">${features.energy}</div><div class="delta ${deltas.energy.startsWith('-') ? 'down' : 'up'}">${deltas.energy}</div></div>
+    </div>`;
+}
+
+function textInsightHtml(insight){
+  return `
+    <div class="text-insight">
+      <div class="tibox"><div class="lab">🙂 Емоційний тон (LLM)</div><div class="val">${insight.tone}</div></div>
+      <div class="tibox"><div class="lab">🔎 Слова-маркери</div><div class="val">${insight.markers}</div></div>
+      <div class="tibox"><div class="lab">💬 Заповнювачі мовлення</div><div class="val">${insight.filler}</div></div>
+    </div>`;
+}
+
+/* Анімовано "прогойдує" acoustic index від 100 (бейзлайн) до реального
+   результату цього дзвінка — це і є момент "score стрибає на очах". */
+function animateIndexNumber(el, from, to, duration){
+  const start = performance.now();
+  function tick(now){
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(from + (to - from) * eased);
+    if (t < 1) requestAnimationFrame(tick);
+    else el.textContent = to;
+  }
+  requestAnimationFrame(tick);
+}
+
+function renderCallAnalysis(scenarioKey){
+  const sc = SCENARIOS[scenarioKey] || SCENARIOS.normal;
+  const cls = indexClassFor(sc.voiceScore);
+
+  const heroEl = document.getElementById('callIndexHero');
+  heroEl.innerHTML = `
+    <div class="ih-lab">Acoustic index (голос Марії)</div>
+    <div class="ih-num ${cls}" id="callIndexNum">100</div>
+    <div class="ih-ref">100 = ваш звичний бейзлайн</div>
+    <div class="ih-delta">${sc.textScore}</div>
+  `;
+  animateIndexNumber(document.getElementById('callIndexNum'), 100, sc.voiceScore, 900);
+
+  document.getElementById('callFeatureBars').innerHTML = featureBarsHtml(sc.features, sc.deltas);
+  document.getElementById('callTextInsight').innerHTML = textInsightHtml(sc.textInsight);
+}
+
+renderPhone();
+
+/* ============================================================
+   ADMIN TAB
+   ============================================================ */
+function renderAdmin(){
+  const latest = history[history.length - 1];
+  const statusCard = document.getElementById('statusCard');
+  const isAlert = latest.status === 'alert';
+  const whenLabel = latest.isNew ? 'Щойно · новий дзвінок' : `Сьогодні · ${fmtDate(latest.date)}`;
+  statusCard.innerHTML = `
+    <div class="status-chip ${isAlert ? 'alert' : 'ok'}">
+      <span class="d"></span> ${isAlert ? 'Варто подзвонити' : 'Звучить як зазвичай'}
+    </div>
+    <div class="status-meta">
+      <div class="muted small">${whenLabel}</div>
+      <p class="rec">${latest.conversationAbout}</p>
+    </div>
+    <a class="btn btn-call-cta" href="tel:+380501234567">📞 Подзвонити</a>
+  `;
+
+  renderChart();
+  renderHistoryTable();
+}
+
+function voiceScoreNote(score, status){
+  if (status === 'alert') return 'нижче звичайного';
+  if (score > 105) return 'бадьоріше за звичай (вище бейзлайну)';
+  if (score > 100) return 'трохи вище бейзлайну';
+  return 'в межах норми';
+}
+
+function renderChart(){
+  const wrap = document.getElementById('chartWrap');
+  const w = 1080, h = 220, pad = 30;
+  const scores = history.map(x => x.voiceScore);
+  const min = 40, max = 115;
+  const stepX = (w - pad * 2) / (scores.length - 1);
+  const baselineY = h - pad - ((100 - min) / (max - min)) * (h - pad * 2);
+
+  const pts = scores.map((s, i) => {
+    const x = pad + i * stepX;
+    const y = h - pad - ((s - min) / (max - min)) * (h - pad * 2);
+    return [x, y];
+  });
+
+  const linePath = pts.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join(' ');
+  const areaPath = `${linePath} L${pts[pts.length-1][0]},${h-pad} L${pts[0][0]},${h-pad} Z`;
+
+  const circles = pts.map((p, i) => {
+    const item = history[i];
+    const fill = item.status === 'alert' ? '#E7B978' : (item.voiceScore > 100 ? '#6BAF7F' : '#5E8C74');
+    if (item.isNew){
+      return `<circle cx="${p[0]}" cy="${p[1]}" r="9" fill="${fill}" stroke="#E2775B" stroke-width="3"><animate attributeName="r" values="9;12;9" dur="1.4s" repeatCount="3"/></circle>`;
+    }
+    return `<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="${fill}" stroke="#fff" stroke-width="2"/>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <svg class="trend" viewBox="0 0 ${w} ${h}" width="100%" height="${h}">
+      <defs>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#94C1A7" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#94C1A7" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line x1="${pad}" y1="${baselineY}" x2="${w - pad}" y2="${baselineY}" stroke="#9A8F82" stroke-dasharray="5 5" stroke-width="1" opacity="0.55"/>
+      <text x="${pad + 4}" y="${baselineY - 5}" font-size="11" fill="#9A8F82" font-weight="700">100 · бейзлайн</text>
+      <path d="${areaPath}" fill="url(#areaGrad)"/>
+      <path d="${linePath}" fill="none" stroke="#5E8C74" stroke-width="3" stroke-linecap="round"/>
+      ${circles}
+    </svg>`;
+}
+
+function renderHistoryTable(){
+  const body = document.getElementById('historyBody');
+  const rows = history.slice().reverse().slice(0, 10);
+  body.innerHTML = rows.map((c, idx) => {
+    const realIdx = history.length - 1 - idx;
+    const emo = c.status === 'alert' ? '😟' : (c.voiceScore > 100 ? '✨' : '🙂');
+    const pillCls = c.status === 'alert' ? 'alert' : (c.voiceScore > 100 ? 'brisk' : 'ok');
+    const pillText = c.status === 'alert' ? 'Увага' : (c.voiceScore > 100 ? 'Бадьоро' : 'Норма');
+    const dateCell = c.isNew ? '<strong style="color:var(--coral-dark);">Щойно</strong>' : fmtDate(c.date);
+    return `
+      <tr class="hrow ${c.isNew ? 'row-new' : ''}" onclick="openModal(${realIdx})">
+        <td>${dateCell}</td>
+        <td><span class="emo">${emo}</span></td>
+        <td>${truncate(c.summary, 54)}</td>
+        <td><span class="pill ${pillCls}">${pillText}</span></td>
+      </tr>`;
+  }).join('');
+}
+
+function openModal(idx){
+  const c = history[idx];
+  const isAlert = c.status === 'alert';
+  document.getElementById('modalDate').textContent = c.isNew ? 'Щойно · цей дзвінок' : fmtDate(c.date, true);
+  document.getElementById('modalHero').className = `modal-hero ${isAlert ? 'alert' : ''}`;
+  document.getElementById('modalIndex').textContent = c.voiceScore;
+  document.getElementById('modalVoice').textContent = voiceScoreNote(c.voiceScore, c.status);
+  document.getElementById('modalSemantics').innerHTML = textInsightHtml(c.textInsight);
+  document.getElementById('modalSummary').textContent = c.conversationAbout;
+  document.getElementById('modalRec').textContent = '💡 ' + c.recommendation;
+
+  const excerptDetails = document.getElementById('modalExcerptDetails');
+  const excerptBox = document.getElementById('modalExcerpt');
+  if (c.excerpt && c.excerpt.length){
+    excerptBox.innerHTML = c.excerpt.map(line => {
+      const cls = line.user ? 'transcript-line user' : 'transcript-line';
+      const tag = line.followUp ? ' <span class="pill ok" style="margin-left:6px;">уточнююче</span>' : '';
+      return `<div class="${cls}"><span class="who">${line.who}</span><span>${line.text}${tag}</span></div>`;
+    }).join('');
+    excerptDetails.style.display = '';
+    excerptDetails.open = !!c.isNew;
+  } else {
+    excerptDetails.style.display = 'none';
+  }
+
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalBackdrop').classList.remove('open'); }
+document.getElementById('modalBackdrop').addEventListener('click', (e) => {
+  if (e.target.id === 'modalBackdrop') closeModal();
+});
+
+function fmtDate(dt, long){
+  return dt.toLocaleDateString('uk-UA', long
+    ? { day: 'numeric', month: 'long', year: 'numeric' }
+    : { day: 'numeric', month: 'short' });
+}
+function truncate(s, n){ return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+
+/* ============================================================
+   ENGINE TAB
+   ============================================================ */
+function jsonBoxHtml(obj){
+  const lines = Object.entries(obj).map(([k, v]) =>
+    `  <span class="k">"${k}"</span>: <span class="v">${v}</span>`,
+  );
+  return `{\n${lines.join(',\n')}\n}`;
+}
+
+function indexClassFor(n){
+  if (n === 100) return 'ref';
+  if (n < 100) return 'low';
+  return 'high';
+}
+
+function renderDemoVoices(){
+  const wrap = document.getElementById('demoVoices');
+  wrap.innerHTML = Object.values(ENGINE_DEMOS).map(d => `
+    <div class="demo-voice-card ${d.id === activeDemoId ? 'active' : ''}"
+         onclick="selectEngineDemo('${d.id}')" role="button" tabindex="0">
+      <div class="dv-top">
+        <div>
+          <div class="dv-name">${d.name}</div>
+          <div class="dv-file">${d.file}</div>
+        </div>
+        <button type="button" class="play-mini" onclick="playDemoAudio('${d.id}', event)" aria-label="Прослухати">▶</button>
+      </div>
+      <div class="dv-index-lab">Acoustic index</div>
+      <div class="dv-index ${d.indexClass}">${d.index}</div>
+    </div>
+  `).join('');
+}
+
+function renderEngineDemo(){
+  const d = ENGINE_DEMOS[activeDemoId];
+  document.getElementById('demoIndexHero').innerHTML = `
+    <div class="ih-lab">Acoustic index</div>
+    <div class="ih-num ${d.indexClass}">${d.index}</div>
+    <div class="ih-ref">100 = бейзлайн · обрано: ${d.name}</div>
+    <div class="ih-delta">${d.delta}</div>
+  `;
+  document.getElementById('demoFeatures').innerHTML = `
+    <div class="demo-feat"><span class="flab">Темп</span><span class="fval">${d.features.tempo_bpm} bpm</span></div>
+    <div class="demo-feat"><span class="flab">Паузи</span><span class="fval">${d.features.pause_mean_ms} мс</span></div>
+    <div class="demo-feat"><span class="flab">Pitch σ</span><span class="fval">${d.features.pitch_std_hz} Hz</span></div>
+    <div class="demo-feat"><span class="flab">Енергія</span><span class="fval">${d.features.energy_rms}</span></div>
+  `;
+  document.getElementById('demoBaselineJson').innerHTML = jsonBoxHtml(DEMO_BASELINE);
+  renderDemoVoices();
+}
+
+function selectEngineDemo(id){
+  activeDemoId = id;
+  renderEngineDemo();
+}
+
+function playDemoAudio(id, event){
+  if (event) event.stopPropagation();
+  const d = ENGINE_DEMOS[id];
+  const el = document.getElementById(d.audio === 'tired' ? 'audioTired' : 'audioNormal');
+  el.currentTime = 0;
+  el.play().catch(() => showToast('Аудіофайл ще не згенеровано (data/scripts/generate_demo_audio.py)'));
+}
+
+function recordUserBaseline(){
+  if (userCheckBusy) return;
+  const btn = document.getElementById('btnRecordBaseline');
+  const panel = document.getElementById('userPanel');
+  btn.disabled = true;
+  document.getElementById('userCheckResult').innerHTML =
+    '<p class="rec-pulse-inline"><span class="rec-dot"></span> Записуємо бейзлайн…</p>';
+  panel.classList.remove('empty');
+
+  setTimeout(() => {
+    userBaseline = {
+      tempo_bpm: +(91 + Math.random() * 8).toFixed(2),
+      pause_mean_ms: +(290 + Math.random() * 50).toFixed(2),
+      pitch_std_hz: +(215 + Math.random() * 25).toFixed(2),
+      energy_rms: +(0.023 + Math.random() * 0.007).toFixed(4),
+    };
+    document.getElementById('userBaselineJson').innerHTML = jsonBoxHtml(userBaseline);
+    document.getElementById('userCheckResult').innerHTML =
+      '<p class="muted small" style="margin:0;">✓ Бейзлайн збережено. Acoustic index цього голосу = <strong>100</strong>. Тепер можна зробити перевірку.</p>';
+    document.getElementById('btnUserCheck').disabled = false;
+    btn.disabled = false;
+    showToast('✓ Бейзлайн записано');
+  }, 600);
+}
+
+function runUserCheck(){
+  if (!userBaseline || userCheckBusy) return;
+  userCheckBusy = true;
+  const btn = document.getElementById('btnUserCheck');
+  const box = document.getElementById('userCheckResult');
+  btn.disabled = true;
+  box.innerHTML = '<p class="rec-pulse-inline"><span class="rec-dot"></span> Записуємо перевірку й порівнюємо з бейзлайном…</p>';
+
+  setTimeout(() => {
+    const index = Math.floor(76 + Math.random() * 18);
+    const cls = indexClassFor(index);
+    const alert = index < 95;
+    box.innerHTML = `
+      <div class="check-result ${alert ? 'alert' : 'ok'}">
+        <div class="muted small" style="font-weight:800; text-transform:uppercase; letter-spacing:.04em;">Результат перевірки vs ваш бейзлайн</div>
+        <div class="cr-index">${index}</div>
+        <p style="margin:6px 0 0; font-weight:700;">
+          ${alert
+            ? 'Є відмінності від вашого бейзлайну — темп нижчий, паузи довші'
+            : 'Звучить близько до вашого бейзлайну'}
+        </p>
+      </div>`;
+    btn.disabled = false;
+    userCheckBusy = false;
+    showToast(`Перевірка: acoustic index ${index}`);
+  }, 700);
+}
+
+renderEngineDemo();
+renderAdmin();
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+</script>
+</body>
+</html>
