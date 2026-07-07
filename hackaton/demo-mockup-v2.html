@@ -290,21 +290,38 @@
   .maria-pick-hint{
     font-size:12px; color:var(--muted); margin-bottom:10px; font-weight:700;
   }
+  /* Кнопка = одна голосова репліка (те, що Марія скаже), без дублюючого label.
+     Label лишається в даних для розробника; на екрані — лише мовлення. */
   .choice-btn-voice{
-    text-align:left; padding:11px 14px; cursor:pointer; font-family:inherit;
-    background:#fff; border:2px solid var(--line); border-radius:14px;
-    transition:.12s ease; width:100%; display:flex; align-items:flex-start; gap:10px;
-    margin-bottom:8px;
+    text-align:left; padding:10px 12px; cursor:pointer; font-family:inherit;
+    background:#fff; border:2px solid #F3D3C4; border-radius:16px 16px 16px 4px;
+    transition:.12s ease; width:100%; display:flex; align-items:center; gap:10px;
+    margin-bottom:8px; box-shadow:0 2px 8px rgba(226,119,91,.08);
+    border-left-width:4px;
   }
-  .choice-btn-voice:hover{border-color:var(--teal); background:var(--sage-tint);}
-  .choice-btn-voice .cb-mic{
-    flex-shrink:0; width:28px; height:28px; border-radius:50%;
-    background:var(--coral-tint); display:flex; align-items:center; justify-content:center;
-    font-size:13px; margin-top:1px;
-  }
+  .choice-btn-voice.voice-low{border-left-color:#C9A227; background:#FFFCF5;}
+  .choice-btn-voice.voice-neutral{border-left-color:var(--deep);}
+  .choice-btn-voice.voice-brisk{border-left-color:#5A9E48; background:#FAFFF8;}
+  .choice-btn-voice:hover{border-color:var(--coral); background:var(--coral-tint);}
+  .choice-btn-voice.voice-low:hover{background:#FFF6E0;}
+  .choice-btn-voice.voice-brisk:hover{background:#F0FAEB;}
+  .choice-btn-voice:active{transform:scale(.98);}
   .choice-btn-voice .cb-body{flex:1; min-width:0;}
-  .choice-btn-voice .cb-label{font-weight:800; color:var(--deep2); font-size:13.5px; display:block;}
-  .choice-btn-voice .cb-maria{font-size:12px; color:var(--muted); margin-top:3px; display:block; line-height:1.3;}
+  .choice-btn-voice .cb-tone{
+    flex-shrink:0; width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .choice-btn-voice.voice-low .cb-tone{background:var(--amber-tint);}
+  .choice-btn-voice.voice-neutral .cb-tone{background:var(--sage-tint);}
+  .choice-btn-voice.voice-brisk .cb-tone{background:#E8F5E0;}
+  .choice-btn-voice .cb-tone svg{width:18px; height:18px; stroke-linecap:round;}
+  .choice-btn-voice.voice-low .cb-tone svg{stroke:#8A5B12;}
+  .choice-btn-voice.voice-neutral .cb-tone svg{stroke:var(--deep2);}
+  .choice-btn-voice.voice-brisk .cb-tone svg{stroke:#4A7A32;}
+  .choice-btn-voice .cb-speech{
+    display:block; font-size:14px; font-weight:700; color:var(--coral-dark);
+    line-height:1.35; font-style:italic;
+  }
 
   .call-controls{
     display:flex; gap:48px; margin-top:auto; width:100%; justify-content:center;
@@ -724,6 +741,27 @@ const SPEAKER_ICON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><polygon p
 const VOICE_BARS_HTML = '<div class="voice-bars"><span></span><span></span><span></span><span></span><span></span></div>';
 const ENGINE_ICON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="2 12 7 12 10 4 14 20 17 12 22 12"/></svg>`;
 
+/* Іконки тону голосу — міні-хвилі різної висоти (без текстових міток) */
+const VOICE_ICON_LOW = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="17" x2="5" y2="14"/><line x1="10" y1="17" x2="10" y2="12"/><line x1="15" y1="17" x2="15" y2="13"/><line x1="20" y1="17" x2="20" y2="14"/></svg>`;
+const VOICE_ICON_NEUTRAL = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" aria-hidden="true"><line x1="4" y1="17" x2="4" y2="10"/><line x1="9" y1="17" x2="9" y2="7"/><line x1="14" y1="17" x2="14" y2="12"/><line x1="19" y1="17" x2="19" y2="9"/></svg>`;
+const VOICE_ICON_BRISK = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" aria-hidden="true"><line x1="3" y1="17" x2="3" y2="8"/><line x1="8" y1="17" x2="8" y2="4"/><line x1="13" y1="17" x2="13" y2="10"/><line x1="18" y1="17" x2="18" y2="5"/><line x1="23" y1="17" x2="23" y2="9"/></svg>`;
+
+/* voice = акустичний характер репліки: колір + іконка хвиль */
+const VOICE_TONE = {
+  low:     { label: 'втомлено',  cls: 'voice-low',     icon: VOICE_ICON_LOW },
+  neutral: { label: 'спокійно',  cls: 'voice-neutral', icon: VOICE_ICON_NEUTRAL },
+  brisk:   { label: 'бадьоро',   cls: 'voice-brisk',   icon: VOICE_ICON_BRISK },
+};
+
+function voiceChoiceBtnHtml(choice, index){
+  const tone = VOICE_TONE[choice.voice || 'neutral'];
+  return `
+    <button type="button" class="choice-btn-voice ${tone.cls}" onclick="pickChoice(${index})" aria-label="Сказати ${tone.label}: ${choice.maria}">
+      <span class="cb-tone">${tone.icon}</span>
+      <span class="cb-speech">${choice.maria}</span>
+    </button>`;
+}
+
 const SCENARIOS = {
   normal: {
     status: 'ok',
@@ -776,50 +814,50 @@ const DIALOGUE_NODES = {
   q_day: {
     hb: 'Як минув твій день?',
     choices: [
-      { label: 'Спокійний, вдома', maria: 'День нормальний, була вдома.', next: 'good_guest' },
-      { label: 'Втомилась', maria: 'Та якось... не дуже виспалась.', next: 'tired_why' },
+      { label: 'Спокійний, вдома', maria: 'День нормальний, була вдома.', voice: 'neutral', next: 'good_guest' },
+      { label: 'Втомилась', maria: 'Та якось... не дуже виспалась.', voice: 'low', next: 'tired_why' },
     ],
   },
   good_guest: {
     hb: 'Заходили до вас хтось сьогодні?',
     choices: [
-      { label: 'Заходила сусідка', maria: 'Заходила сусідка, пили чай.', next: 'good_social' },
-      { label: 'Ні, тихо вдома', maria: 'Ні, тихенько, читала книжку.', next: 'good_quiet' },
+      { label: 'Заходила сусідка', maria: 'Заходила сусідка, пили чай.', voice: 'neutral', next: 'good_social' },
+      { label: 'Ні, тихо вдома', maria: 'Ні, тихенько, читала книжку.', voice: 'neutral', next: 'good_quiet' },
     ],
   },
   good_social: {
     hb: 'Як приємно! Ви добре поспілкувались?',
     choices: [
-      { label: 'Так, дуже приємно', maria: 'Так, дуже приємно, дякую.', next: 'end_normal' },
+      { label: 'Так, дуже приємно', maria: 'Так, дуже приємно, дякую.', voice: 'brisk', next: 'end_normal' },
     ],
   },
   good_quiet: {
     hb: 'Зрозуміло. А настрій загалом як?',
     choices: [
-      { label: 'Добре, спокійно', maria: 'Почуваюсь добре, дякую.', next: 'end_normal' },
-      { label: 'Трохи нудно', maria: 'Трохи нудно, але нічого страшного.', next: 'end_normal' },
+      { label: 'Добре, спокійно', maria: 'Почуваюсь добре, дякую.', voice: 'neutral', next: 'end_normal' },
+      { label: 'Трохи нудно', maria: 'Трохи нудно, але нічого страшного.', voice: 'low', next: 'end_normal' },
     ],
   },
   tired_why: {
     hb: 'Чую вас. Це через погану ніч, чи просто важкий день?',
     followUp: true,
     choices: [
-      { label: 'Не виспалась', maria: 'Скоріше не виспалась, сусідка допізна шуміла.', next: 'tired_body' },
-      { label: 'Просто мало сил', maria: 'Просто мало сил сьогодні, нічого особливого.', next: 'tired_rest' },
+      { label: 'Не виспалась', maria: 'Скоріше не виспалась, сусідка допізна шуміла.', voice: 'low', next: 'tired_body' },
+      { label: 'Просто мало сил', maria: 'Просто мало сил сьогодні, нічого особливого.', voice: 'low', next: 'tired_rest' },
     ],
   },
   tired_body: {
     hb: 'Зрозуміло. А є щось, що турбує — голова, суглоби?',
     choices: [
-      { label: 'Трохи болить голова', maria: 'Трохи голова болить, а так нічого.', next: 'end_tired' },
-      { label: 'Ні, просто втома', maria: 'Ні, просто втомлена, полежала більше.', next: 'end_tired_mild' },
+      { label: 'Трохи болить голова', maria: 'Трохи голова болить, а так нічого.', voice: 'low', next: 'end_tired' },
+      { label: 'Ні, просто втома', maria: 'Ні, просто втомлена, полежала більше.', voice: 'low', next: 'end_tired_mild' },
     ],
   },
   tired_rest: {
     hb: 'Може, варто сьогодні більше відпочити. Щось приємне було?',
     choices: [
-      { label: 'Онук дзвонив', maria: 'Онук дзвонив увечері, це трохи підняло настрій.', next: 'end_tired_mild' },
-      { label: 'Нічого особливого', maria: 'Нічого особливого, полежала.', next: 'end_tired' },
+      { label: 'Онук дзвонив', maria: 'Онук дзвонив увечері, це трохи підняло настрій.', voice: 'neutral', next: 'end_tired_mild' },
+      { label: 'Нічого особливого', maria: 'Нічого особливого, полежала.', voice: 'low', next: 'end_tired' },
     ],
   },
   end_normal: {
@@ -1079,7 +1117,7 @@ let callTimerSec = 0;
 const OPENING_GREETING = 'Добрий день, Маріє! Це HearBeat — короткий чек-ін від Олени.';
 
 const OPENING_CHOICE = [
-  { label: 'Так, добре', maria: 'Так, добре.', accept: true },
+  { label: 'Так, добре', maria: 'Так, добре.', voice: 'neutral', accept: true },
 ];
 
 function currentNode(){
@@ -1153,21 +1191,13 @@ function buildResponseAreaHtml(){
   }
 
   if (s.uiMode === 'maria_choices' && s.choices && s.choices.length){
-    const pickHint = s.choices[0].accept === true && s.stepCount === 0
-      ? 'Продовжити розмову:'
-      : 'Що відповість Марія:';
+    const pickHint = s.choices.length === 1
+      ? 'Натисніть, щоб сказати:'
+      : 'Оберіть репліку голосом:';
     return `
       <div class="maria-pick">
         <div class="maria-pick-hint">${pickHint}</div>
-        ${s.choices.map((c, i) => `
-          <button type="button" class="choice-btn-voice" onclick="pickChoice(${i})">
-            <span class="cb-mic">🎙</span>
-            <span class="cb-body">
-              <span class="cb-label">${c.label}</span>
-              <span class="cb-maria">«${c.maria}»</span>
-            </span>
-          </button>
-        `).join('')}
+        ${s.choices.map((c, i) => voiceChoiceBtnHtml(c, i)).join('')}
       </div>`;
   }
 
