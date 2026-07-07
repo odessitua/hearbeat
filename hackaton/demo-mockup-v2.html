@@ -534,7 +534,6 @@
   .user-panel{
     margin-top:16px; padding-top:16px; border-top:1px solid var(--line);
   }
-  .user-panel.empty .user-panel-body{display:none;}
   .check-result{
     margin-top:14px; padding:14px 16px; border-radius:16px;
     background:var(--amber-tint); border:1px solid #F0DBA8;
@@ -544,6 +543,29 @@
   .check-result.ok .cr-index{color:var(--deep2);}
   .check-result.alert{background:var(--coral-tint); border-color:#F3D3C4;}
   .check-result.alert .cr-index{color:var(--coral-dark);}
+
+  .live-toggle-row{
+    display:flex; align-items:center; gap:10px; margin:14px 0 4px;
+    padding:10px 14px; background:var(--paper); border:1px solid var(--line); border-radius:14px;
+  }
+  .live-toggle-row .switch{position:relative; width:40px; height:23px; flex-shrink:0;}
+  .live-toggle-row .switch input{opacity:0; width:0; height:0;}
+  .live-toggle-row .slider{
+    position:absolute; cursor:pointer; inset:0; background:#D8CFC2; border-radius:999px; transition:.2s;
+  }
+  .live-toggle-row .slider::before{
+    content:""; position:absolute; width:17px; height:17px; left:3px; top:3px;
+    background:#fff; border-radius:50%; transition:.2s;
+  }
+  .live-toggle-row input:checked + .slider{background:var(--coral);}
+  .live-toggle-row input:checked + .slider::before{transform:translateX(17px);}
+  .live-toggle-row .ltr-label{font-size:13px; font-weight:800; color:var(--ink);}
+  .live-toggle-row .ltr-note{font-size:11.5px; color:var(--muted); margin-left:auto; text-align:right;}
+  .live-badge{
+    display:inline-block; font-size:10.5px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.03em; padding:2px 8px; border-radius:999px; margin-left:8px;
+    background:var(--coral-tint); color:var(--coral-dark);
+  }
 
   .rec-pulse-inline{
     display:inline-flex; align-items:center; gap:8px; color:var(--deep2); font-weight:800; font-size:14px;
@@ -671,8 +693,20 @@
 
       <div class="card">
         <span class="engine-tag" style="background:var(--deep2);">СВІЙ БЕЙЗЛАЙН</span>
-        <h2 class="engine-section-title">Запис і перевірка</h2>
+        <h2 class="engine-section-title">
+          Запис і перевірка
+          <span class="live-badge" id="liveBadge" style="display:none;">Live</span>
+        </h2>
         <p class="muted small" style="margin:0;">Спочатку запишіть свій голос як еталон (індекс 100), потім — перевірку для порівняння з ним.</p>
+
+        <div class="live-toggle-row">
+          <label class="switch">
+            <input type="checkbox" id="liveToggle" onchange="toggleLiveMode()">
+            <span class="slider"></span>
+          </label>
+          <span class="ltr-label">Live-режим (справжній мікрофон + рушій)</span>
+          <span class="ltr-note" id="liveNote">Вимкнено — симуляція без бекенду</span>
+        </div>
 
         <div class="record-actions">
           <button type="button" class="btn btn-primary" id="btnRecordBaseline" onclick="recordUserBaseline()">🎙 Записати бейзлайн</button>
@@ -680,11 +714,18 @@
         </div>
 
         <div class="user-panel empty" id="userPanel">
-          <div class="user-panel-body">
-            <div class="insight-lab">Ваш збережений бейзлайн</div>
-            <pre class="json-box" id="userBaselineJson"></pre>
+          <div id="userStatusNote"></div>
+          <div class="index-hero" id="userIndexHero" style="display:none;"></div>
+          <div class="grid2" id="userDetailsGrid" style="display:none;">
+            <div>
+              <div class="insight-lab" id="userFeaturesLabel">Ознаки запису</div>
+              <div class="demo-features" id="userFeatures"></div>
+            </div>
+            <div>
+              <div class="insight-lab">Ваш бейзлайн (еталон, JSON)</div>
+              <pre class="json-box" id="userBaselineJson"></pre>
+            </div>
           </div>
-          <div id="userCheckResult"></div>
         </div>
       </div>
 
@@ -1080,6 +1121,15 @@ const ENGINE_DEMOS = {
 let activeDemoId = 'baseline';
 let userBaseline = null;
 let userCheckBusy = false;
+
+/*
+ * Live-режим: реальний мікрофон + запит до hearbeat-engine (hackaton/hearbeat-engine).
+ * Вимкнено за замовчуванням — на демо без розгорнутого бекенду працює симуляція.
+ * Щоб увімкнути насправді: задеплойте hearbeat-engine (Railway/Render) і впишіть
+ * його публічний URL нижче, потім ввімкніть перемикач "Live-режим" в UI.
+ */
+const ENGINE_URL = 'https://your-hearbeat-engine.onrender.com';
+let liveMode = false;
 
 /* ============================================================
    ЗОЛОТИЙ ШЛЯХ: одна сцена, що розкривається за кроками
@@ -1741,14 +1791,149 @@ function playDemoAudio(id, event){
   el.play().catch(() => showToast('Аудіофайл ще не згенеровано (data/scripts/generate_demo_audio.py)'));
 }
 
+function toggleLiveMode(){
+  liveMode = document.getElementById('liveToggle').checked;
+  document.getElementById('liveBadge').style.display = liveMode ? 'inline-block' : 'none';
+  document.getElementById('liveNote').textContent = liveMode
+    ? 'Увімкнено — записуємо мікрофон і питаємо реальний рушій'
+    : 'Вимкнено — симуляція без бекенду';
+  userBaseline = null;
+  document.getElementById('userPanel').classList.add('empty');
+  document.getElementById('userStatusNote').innerHTML = '';
+  document.getElementById('userIndexHero').style.display = 'none';
+  document.getElementById('userDetailsGrid').style.display = 'none';
+  document.getElementById('userBaselineJson').innerHTML = '';
+  document.getElementById('btnUserCheck').disabled = true;
+  if (liveMode) {
+    showToast('Live-режим увімкнено — потрібен дозвіл на мікрофон');
+  }
+}
+
+/* ---- Візуалізація "Свій бейзлайн" у стилі блоку ДЕМО (index-hero + ознаки) ---- */
+
+function setUserStatus(html){
+  document.getElementById('userPanel').classList.remove('empty');
+  document.getElementById('userStatusNote').innerHTML = html;
+}
+
+function showUserResult(features, index, deltaText, labelText, baselineForJson){
+  document.getElementById('userPanel').classList.remove('empty');
+  const hero = document.getElementById('userIndexHero');
+  hero.style.display = '';
+  hero.innerHTML = `
+    <div class="ih-lab">Acoustic index${liveMode ? ' · live' : ''}</div>
+    <div class="ih-num ${indexClassFor(index)}">${index}</div>
+    <div class="ih-ref">100 = ваш бейзлайн · ${labelText}</div>
+    <div class="ih-delta">${deltaText}</div>
+  `;
+  document.getElementById('userDetailsGrid').style.display = '';
+  document.getElementById('userFeatures').innerHTML = `
+    <div class="demo-feat"><span class="flab">Темп</span><span class="fval">${features.tempo_bpm} bpm</span></div>
+    <div class="demo-feat"><span class="flab">Паузи</span><span class="fval">${features.pause_mean_ms} мс</span></div>
+    <div class="demo-feat"><span class="flab">Pitch σ</span><span class="fval">${features.pitch_std_hz} Hz</span></div>
+    <div class="demo-feat"><span class="flab">Енергія</span><span class="fval">${features.energy_rms}</span></div>
+  `;
+  if (baselineForJson) {
+    document.getElementById('userBaselineJson').innerHTML = jsonBoxHtml(baselineForJson);
+  }
+}
+
+/* Mock-обчислення, що повторює формулу рушія (tempo + паузи + енергія, 100 = бейзлайн),
+   аби демо-режим і live-режим виглядали за однаковою логікою. */
+const MOCK_FATIGUE_WEIGHTS = { tempo_bpm: 0.35, pause_mean_ms: 0.35, energy_rms: 0.30 };
+
+function computeMockIndex(current, baseline){
+  let total = 0;
+  let weightSum = 0;
+  for (const key in MOCK_FATIGUE_WEIGHTS) {
+    const w = MOCK_FATIGUE_WEIGHTS[key];
+    const pct = key === 'pause_mean_ms'
+      ? (current[key] <= 0 ? 100 : (100 * baseline[key]) / current[key])
+      : (100 * current[key]) / baseline[key];
+    total += pct * w;
+    weightSum += w;
+  }
+  return Math.round((total / weightSum) * 10) / 10;
+}
+
+function mockDeviationDelta(current, baseline, index){
+  const devs = [];
+  const tempoDev = ((current.tempo_bpm - baseline.tempo_bpm) / baseline.tempo_bpm) * 100;
+  const pauseDev = ((current.pause_mean_ms - baseline.pause_mean_ms) / baseline.pause_mean_ms) * 100;
+  const energyDev = ((current.energy_rms - baseline.energy_rms) / baseline.energy_rms) * 100;
+  if (tempoDev <= -25) devs.push([Math.abs(tempoDev), `Темп мовлення нижчий на ${Math.abs(Math.round(tempoDev))}%`]);
+  if (pauseDev >= 25) devs.push([pauseDev, `Паузи довші на ${Math.round(pauseDev)}%`]);
+  if (energyDev <= -25) devs.push([Math.abs(energyDev), `Енергія голосу нижча на ${Math.abs(Math.round(energyDev))}%`]);
+  devs.sort((a, b) => b[0] - a[0]);
+  if (!devs.length) {
+    return index > 105
+      ? 'Голос бодріший за звичний бейзлайн — без приводів для тривоги'
+      : 'Звучить близько до вашого бейзлайну';
+  }
+  return devs.slice(0, 2).map((d) => d[1]).join('; ');
+}
+
+function generateMockCheckFeatures(baseline){
+  const r = Math.random();
+  let tempoMul;
+  let pauseMul;
+  let energyMul;
+  if (r < 0.55) {
+    tempoMul = 0.68 + Math.random() * 0.12;
+    pauseMul = 1.35 + Math.random() * 0.35;
+    energyMul = 0.65 + Math.random() * 0.15;
+  } else if (r < 0.8) {
+    tempoMul = 0.92 + Math.random() * 0.16;
+    pauseMul = 0.9 + Math.random() * 0.2;
+    energyMul = 0.9 + Math.random() * 0.2;
+  } else {
+    tempoMul = 1.08 + Math.random() * 0.12;
+    pauseMul = 0.65 + Math.random() * 0.2;
+    energyMul = 1.1 + Math.random() * 0.15;
+  }
+  return {
+    tempo_bpm: +(baseline.tempo_bpm * tempoMul).toFixed(2),
+    pause_mean_ms: +(baseline.pause_mean_ms * pauseMul).toFixed(2),
+    pitch_std_hz: +(baseline.pitch_std_hz * (0.9 + Math.random() * 0.2)).toFixed(2),
+    energy_rms: +(baseline.energy_rms * energyMul).toFixed(4),
+  };
+}
+
+async function recordMicClip(maxSec){
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const recorder = new MediaRecorder(stream);
+  const chunks = [];
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, maxSec * 1000);
+    recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onerror = () => { clearTimeout(timer); stream.getTracks().forEach(t => t.stop()); reject(new Error('RECORD_FAILED')); };
+    recorder.onstop = () => {
+      clearTimeout(timer);
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(chunks, { type: 'audio/webm' });
+      if (blob.size < 100) { reject(new Error('AUDIO_TOO_SHORT')); return; }
+      resolve(blob);
+    };
+    recorder.start();
+  });
+}
+
+async function analyzeWithEngine(blob, baselineFeatures){
+  const form = new FormData();
+  form.append('audio_file', blob, 'clip.webm');
+  if (baselineFeatures) form.append('baseline_features', JSON.stringify(baselineFeatures));
+  const res = await fetch(`${ENGINE_URL}/analyze`, { method: 'POST', body: form });
+  if (!res.ok) throw new Error(`ENGINE_HTTP_${res.status}`);
+  return res.json();
+}
+
 function recordUserBaseline(){
   if (userCheckBusy) return;
+  if (liveMode) { recordUserBaselineLive(); return; }
+
   const btn = document.getElementById('btnRecordBaseline');
-  const panel = document.getElementById('userPanel');
   btn.disabled = true;
-  document.getElementById('userCheckResult').innerHTML =
-    '<p class="rec-pulse-inline"><span class="rec-dot"></span> Записуємо бейзлайн…</p>';
-  panel.classList.remove('empty');
+  setUserStatus('<p class="rec-pulse-inline"><span class="rec-dot"></span> Записуємо бейзлайн…</p>');
 
   setTimeout(() => {
     userBaseline = {
@@ -1757,41 +1942,94 @@ function recordUserBaseline(){
       pitch_std_hz: +(215 + Math.random() * 25).toFixed(2),
       energy_rms: +(0.023 + Math.random() * 0.007).toFixed(4),
     };
-    document.getElementById('userBaselineJson').innerHTML = jsonBoxHtml(userBaseline);
-    document.getElementById('userCheckResult').innerHTML =
-      '<p class="muted small" style="margin:0;">✓ Бейзлайн збережено. Acoustic index цього голосу = <strong>100</strong>. Тепер можна зробити перевірку.</p>';
+    setUserStatus('<p class="muted small" style="margin:0;">✓ Бейзлайн збережено. Тепер можна зробити перевірку.</p>');
+    showUserResult(
+      userBaseline, 100,
+      'Голос звучить як зазвичай — це еталон бейзлайну',
+      'щойно записано', userBaseline
+    );
     document.getElementById('btnUserCheck').disabled = false;
     btn.disabled = false;
     showToast('✓ Бейзлайн записано');
   }, 600);
 }
 
+async function recordUserBaselineLive(){
+  const btn = document.getElementById('btnRecordBaseline');
+  btn.disabled = true;
+  setUserStatus('<p class="rec-pulse-inline"><span class="rec-dot"></span> Говоріть 4-5 секунд у мікрофон…</p>');
+
+  try {
+    const blob = await recordMicClip(6);
+    setUserStatus('<p class="rec-pulse-inline"><span class="rec-dot"></span> Аналізуємо запис рушієм…</p>');
+    const result = await analyzeWithEngine(blob, null);
+    userBaseline = result.features_json;
+    setUserStatus('<p class="muted small" style="margin:0;">✓ Бейзлайн збережено рушієм. Тепер можна зробити перевірку.</p>');
+    showUserResult(
+      userBaseline, 100,
+      'Голос звучить як зазвичай — це еталон бейзлайну',
+      'щойно записано (live)', userBaseline
+    );
+    document.getElementById('btnUserCheck').disabled = false;
+    showToast('✓ Бейзлайн записано (live)');
+  } catch (err) {
+    setUserStatus(`<p class="muted small" style="margin:0; color:var(--coral-dark);">✗ Не вдалося: ${liveErrorMessage(err)}</p>`);
+    showToast('Помилка запису — див. деталі під кнопкою');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function liveErrorMessage(err){
+  const msg = String(err && err.message || err);
+  if (msg.includes('Permission') || msg === 'NotAllowedError') return 'немає дозволу на мікрофон';
+  if (msg.includes('AUDIO_TOO_SHORT')) return 'запис зашумний/занадто короткий';
+  if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) return `рушій недоступний (перевірте ENGINE_URL: ${ENGINE_URL})`;
+  return msg;
+}
+
 function runUserCheck(){
   if (!userBaseline || userCheckBusy) return;
+  if (liveMode) { runUserCheckLive(); return; }
+
   userCheckBusy = true;
   const btn = document.getElementById('btnUserCheck');
-  const box = document.getElementById('userCheckResult');
   btn.disabled = true;
-  box.innerHTML = '<p class="rec-pulse-inline"><span class="rec-dot"></span> Записуємо перевірку й порівнюємо з бейзлайном…</p>';
+  setUserStatus('<p class="rec-pulse-inline"><span class="rec-dot"></span> Записуємо перевірку й порівнюємо з бейзлайном…</p>');
 
   setTimeout(() => {
-    const index = Math.floor(76 + Math.random() * 18);
-    const cls = indexClassFor(index);
-    const alert = index < 95;
-    box.innerHTML = `
-      <div class="check-result ${alert ? 'alert' : 'ok'}">
-        <div class="muted small" style="font-weight:800; text-transform:uppercase; letter-spacing:.04em;">Результат перевірки vs ваш бейзлайн</div>
-        <div class="cr-index">${index}</div>
-        <p style="margin:6px 0 0; font-weight:700;">
-          ${alert
-            ? 'Є відмінності від вашого бейзлайну — темп нижчий, паузи довші'
-            : 'Звучить близько до вашого бейзлайну'}
-        </p>
-      </div>`;
+    const checkFeatures = generateMockCheckFeatures(userBaseline);
+    const index = computeMockIndex(checkFeatures, userBaseline);
+    const delta = mockDeviationDelta(checkFeatures, userBaseline, index);
+    setUserStatus('');
+    showUserResult(checkFeatures, index, delta, 'поточна перевірка');
     btn.disabled = false;
     userCheckBusy = false;
     showToast(`Перевірка: acoustic index ${index}`);
   }, 700);
+}
+
+async function runUserCheckLive(){
+  userCheckBusy = true;
+  const btn = document.getElementById('btnUserCheck');
+  btn.disabled = true;
+  setUserStatus('<p class="rec-pulse-inline"><span class="rec-dot"></span> Говоріть 4-5 секунд — порівнюємо з бейзлайном…</p>');
+
+  try {
+    const blob = await recordMicClip(6);
+    setUserStatus('<p class="rec-pulse-inline"><span class="rec-dot"></span> Аналізуємо запис рушієм…</p>');
+    const result = await analyzeWithEngine(blob, userBaseline);
+    const index = Math.round(result.acoustic_index);
+    setUserStatus('');
+    showUserResult(result.features_json, index, result.acoustic_delta, 'поточна перевірка (live)');
+    showToast(`Перевірка (live): acoustic index ${index}`);
+  } catch (err) {
+    setUserStatus(`<p class="muted small" style="margin:0; color:var(--coral-dark);">✗ Не вдалося: ${liveErrorMessage(err)}</p>`);
+    showToast('Помилка перевірки — див. деталі під кнопкою');
+  } finally {
+    btn.disabled = false;
+    userCheckBusy = false;
+  }
 }
 
 renderEngineDemo();
