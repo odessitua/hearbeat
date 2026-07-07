@@ -81,5 +81,6 @@ uvicorn app:app --reload --port 8000
 const ENGINE_URL = 'https://hearbeat-engine.onrender.com';
 ```
 
-На сторінці демки ввімкніть тумблер **Live-режим** в блоці «Свій бейзлайн».
+На сторінці демки впишіть цей URL у `ENGINE_URL` — live-режим увімкнеться автоматично
+(без тумблера). Поки URL = placeholder, працює тиха симуляція з банером.
 Перевірка: `https://<ваш-url>/health` → `{"status":"ok"}`.
