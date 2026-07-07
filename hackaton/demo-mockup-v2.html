@@ -138,8 +138,12 @@
   }
   .phone-screen{
     background:var(--paper); border-radius:30px; height:100%; min-height:532px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    display:flex; flex-direction:column; align-items:center;
     padding:32px 22px; text-align:center; position:relative; overflow:hidden;
+  }
+  .phone-screen.call-active-layout{
+    justify-content:flex-start;
+    padding:18px 16px 14px;
   }
   .phone-screen::before{
     content:""; position:absolute; width:260px; height:260px; border-radius:50%;
@@ -177,44 +181,146 @@
   .consent-box p{font-size:15.5px; line-height:1.5; color:var(--ink);}
   .consent-actions{display:flex; flex-direction:column; gap:12px; width:100%; margin-top:20px;}
 
-  .question-box{width:100%; padding:6px 2px;}
-  .q-progress{display:flex; gap:6px; justify-content:center; margin-bottom:22px;}
-  .q-dot{width:8px; height:8px; border-radius:50%; background:var(--line);}
-  .q-dot.done{background:var(--teal);}
-  .q-dot.current{background:var(--coral);}
-  .q-bubble{
-    background:#fff; border:1px solid var(--line); border-radius:18px 18px 18px 4px;
-    padding:16px 18px; font-size:16.5px; font-weight:700; color:var(--deep2);
-    margin-bottom:22px; box-shadow:0 4px 12px rgba(94,140,116,.1);
-  }
-  .rec-hint{font-size:13px; color:var(--muted); margin-bottom:14px;}
-  .rec-pulse{
-    display:inline-flex; align-items:center; gap:8px; color:var(--coral-dark); font-weight:800;
-    font-size:14.5px;
-  }
-  .rec-dot{width:10px; height:10px; border-radius:50%; background:var(--coral); animation:blink 1s infinite;}
-  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+  /* ---------- Активний дзвінок: живий голосовий інтерфейс ---------- */
+  .call-active{width:100%; height:100%; display:flex; flex-direction:column; position:relative; z-index:1;}
+  .call-active-header{margin-bottom:10px;}
+  .call-active-name{font-size:15px; font-weight:800; color:var(--deep2);}
+  .call-active-timer{font-size:12.5px; color:var(--muted); font-weight:700; font-variant-numeric:tabular-nums; margin-top:2px;}
 
-  .demo-scenario-row{
-    display:flex; gap:10px; justify-content:center; margin-top:16px; flex-wrap:wrap;
+  /* Питання HearBeat і відповідь Марії — фіксована зона зверху, що НЕ зсувається
+     при появі варіантів відповіді; це і є "запис" поточного обміну репліками. */
+  .qa-zone{
+    width:100%; text-align:left; padding-bottom:14px; margin-bottom:12px;
+    border-bottom:1px solid var(--line); min-height:148px;
   }
-  .demo-scenario-row .btn{font-size:12.5px; padding:8px 14px;}
+  .qa-row{display:flex; gap:10px; align-items:flex-start;}
+  .qa-row + .qa-row{margin-top:14px;}
+  .qa-row-maria{display:none;}
+  .qa-row-maria.shown{display:flex; animation:fadeIn .3s ease;}
+  .qa-avatar{
+    flex-shrink:0; width:28px; height:28px; border-radius:50%; margin-top:1px;
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#fff;
+  }
+  .qa-row-hb .qa-avatar{background:var(--deep);}
+  .qa-row-maria .qa-avatar{background:var(--coral);}
+  .qa-body{flex:1; min-width:0;}
+  .qa-label{
+    font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--muted); margin-bottom:3px; transition:.15s ease;
+  }
+  .qa-row-hb .qa-label.active{color:var(--deep);}
+  .qa-row-maria .qa-label.active{color:var(--coral-dark);}
+  .qa-text{font-size:15px; font-weight:700; color:var(--deep2); line-height:1.4; min-height:1.4em;}
+  .qa-row-maria .qa-text{color:var(--coral-dark);}
 
-  .dialogue-choices{display:flex; flex-direction:column; gap:10px; margin-top:14px; width:100%;}
-  .choice-btn{
-    text-align:left; padding:12px 14px; cursor:pointer; font-family:inherit;
+  /* Зона під питанням: індикатор запису, варіанти відповіді або підтвердження "записано" */
+  .call-response-area{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-height:120px; width:100%; padding:4px;
+  }
+
+  .voice-bars{display:flex; gap:5px; align-items:flex-end; height:30px; margin-bottom:10px;}
+  .voice-bars span{
+    display:block; width:5px; border-radius:3px; background:var(--deep);
+    animation:voiceBar .45s ease-in-out infinite;
+  }
+  .voice-bars span:nth-child(1){height:9px; animation-delay:0s;}
+  .voice-bars span:nth-child(2){height:16px; animation-delay:.08s;}
+  .voice-bars span:nth-child(3){height:24px; animation-delay:.16s;}
+  .voice-bars span:nth-child(4){height:14px; animation-delay:.24s;}
+  .voice-bars span:nth-child(5){height:19px; animation-delay:.12s;}
+  @keyframes voiceBar{
+    0%,100%{transform:scaleY(.45); opacity:.55;}
+    50%{transform:scaleY(1); opacity:1;}
+  }
+
+  .mic-ring{
+    width:52px; height:52px; border-radius:50%; background:var(--coral-tint);
+    border:2px solid #F3D3C4; display:flex; align-items:center; justify-content:center;
+    margin-bottom:10px; animation:micPulse 1s ease-in-out infinite;
+  }
+  .mic-ring svg{width:22px; height:22px; stroke:var(--coral-dark); fill:none; stroke-width:2;}
+  @keyframes micPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(226,119,91,.35);}
+    50%{box-shadow:0 0 0 10px rgba(226,119,91,0);}
+  }
+
+  .rec-indicator-label{
+    font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--muted); margin-bottom:2px;
+  }
+  .rec-indicator-label.speaking{color:var(--deep);}
+  .rec-indicator-label.listening{color:var(--coral-dark);}
+
+  /* AI-рушій "обробляє" щойно записану відповідь — акустика + зміст —
+     перш ніж поставити наступне доречне питання. */
+  .engine-processing{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    animation:fadeIn .25s ease;
+  }
+  .engine-processing-icon{
+    width:48px; height:48px; border-radius:50%; background:var(--sage-tint);
+    border:2px solid #DCEBE2; display:flex; align-items:center; justify-content:center;
+    animation:enginePulse 1.2s ease-in-out infinite;
+  }
+  .engine-processing-icon svg{
+    width:22px; height:22px; stroke:var(--deep); fill:none;
+    stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+  }
+  @keyframes enginePulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(94,140,116,.35);}
+    50%{box-shadow:0 0 0 12px rgba(94,140,116,0);}
+  }
+  .engine-processing-label{
+    font-size:12px; font-weight:800; color:var(--deep2); text-align:center; max-width:230px; line-height:1.35;
+  }
+  .engine-processing-dots{display:flex; gap:5px;}
+  .engine-processing-dots span{
+    width:6px; height:6px; border-radius:50%; background:var(--deep);
+    animation:dotPulse 1s ease-in-out infinite;
+  }
+  .engine-processing-dots span:nth-child(2){animation-delay:.15s;}
+  .engine-processing-dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes dotPulse{
+    0%,100%{opacity:.25; transform:scale(.7);}
+    50%{opacity:1; transform:scale(1);}
+  }
+
+  .maria-pick{width:100%; margin-top:4px;}
+  .maria-pick-hint{
+    font-size:12px; color:var(--muted); margin-bottom:10px; font-weight:700;
+  }
+  .choice-btn-voice{
+    text-align:left; padding:11px 14px; cursor:pointer; font-family:inherit;
     background:#fff; border:2px solid var(--line); border-radius:14px;
-    transition:.12s ease; width:100%;
+    transition:.12s ease; width:100%; display:flex; align-items:flex-start; gap:10px;
+    margin-bottom:8px;
   }
-  .choice-btn:hover{border-color:var(--teal); background:var(--sage-tint);}
-  .choice-btn:active{transform:scale(.98);}
-  .choice-btn .cb-label{font-weight:800; color:var(--deep2); font-size:14px; display:block;}
-  .choice-btn .cb-maria{font-size:12.5px; color:var(--muted); margin-top:5px; display:block; line-height:1.35;}
-  .choice-btn .cb-tag{
-    display:inline-block; font-size:10.5px; font-weight:800; text-transform:uppercase;
-    letter-spacing:.03em; color:var(--coral-dark); background:var(--coral-tint);
-    padding:2px 8px; border-radius:999px; margin-bottom:4px;
+  .choice-btn-voice:hover{border-color:var(--teal); background:var(--sage-tint);}
+  .choice-btn-voice .cb-mic{
+    flex-shrink:0; width:28px; height:28px; border-radius:50%;
+    background:var(--coral-tint); display:flex; align-items:center; justify-content:center;
+    font-size:13px; margin-top:1px;
   }
+  .choice-btn-voice .cb-body{flex:1; min-width:0;}
+  .choice-btn-voice .cb-label{font-weight:800; color:var(--deep2); font-size:13.5px; display:block;}
+  .choice-btn-voice .cb-maria{font-size:12px; color:var(--muted); margin-top:3px; display:block; line-height:1.3;}
+
+  .call-controls{
+    display:flex; gap:48px; margin-top:auto; width:100%; justify-content:center;
+    padding-top:10px; align-items:center;
+  }
+  .ctrl-btn{
+    width:58px; height:58px; border-radius:50%; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 16px rgba(0,0,0,.15); transition:.12s ease;
+  }
+  .ctrl-btn:active{transform:scale(.94);}
+  .ctrl-speaker{background:var(--sage-tint); color:var(--deep2);}
+  .ctrl-speaker svg{width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:2;}
+  .ctrl-hangup{background:#D9604A; color:#fff; font-size:24px; font-weight:700; line-height:1;}
+
+  .question-box{width:100%; padding:6px 2px;}
 
   .done-check{font-size:56px; margin-bottom:10px;}
 
@@ -613,6 +719,10 @@
    DEMO DATA (mock, in-memory only — for UX iteration, no backend)
    ============================================================ */
 const PHONE_ICON_SVG = `<svg class="phone-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`;
+const MIC_ICON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`;
+const SPEAKER_ICON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`;
+const VOICE_BARS_HTML = '<div class="voice-bars"><span></span><span></span><span></span><span></span><span></span></div>';
+const ENGINE_ICON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="2 12 7 12 10 4 14 20 17 12 22 12"/></svg>`;
 
 const SCENARIOS = {
   normal: {
@@ -955,24 +1065,153 @@ let callState = {
   scenario: null,
   transcript: [],
   stepCount: 0,
+  uiMode: 'idle',
+  hbText: '',
+  mariaText: '',
+  mariaShown: false,
+  choices: null,
+  animToken: 0,
+  speakerOn: true,
 };
+let callTimerId = null;
+let callTimerSec = 0;
 
-const OPENING_LINES = [
-  { who: 'HearBeat', text: 'Добрий день, Маріє! Це HearBeat — короткий чек-ін від Олени.' },
-  { who: 'Марія', text: 'Добрий день! Так, слухаю.', user: true },
+const OPENING_GREETING = 'Добрий день, Маріє! Це HearBeat — короткий чек-ін від Олени.';
+
+const OPENING_CHOICE = [
+  { label: 'Так, добре', maria: 'Так, добре.', accept: true },
 ];
 
 function currentNode(){
   return DIALOGUE_NODES[callState.nodeId];
 }
 
-function dialogueProgressDots(){
-  const total = 4;
-  const done = Math.min(callState.stepCount, total - 1);
-  return Array.from({ length: total }, (_, i) => {
-    const cls = i < done ? 'done' : (i === done ? 'current' : '');
-    return `<span class="q-dot ${cls}"></span>`;
-  }).join('');
+function delay(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function startCallTimer(){
+  callTimerSec = 0;
+  stopCallTimer();
+  callTimerId = setInterval(() => {
+    callTimerSec += 1;
+    const el = document.getElementById('callTimer');
+    if (el) {
+      const m = Math.floor(callTimerSec / 60);
+      const s = String(callTimerSec % 60).padStart(2, '0');
+      el.textContent = `${m}:${s}`;
+    }
+  }, 1000);
+}
+
+function stopCallTimer(){
+  if (callTimerId) {
+    clearInterval(callTimerId);
+    callTimerId = null;
+  }
+}
+
+function formatCallTimer(){
+  const m = Math.floor(callTimerSec / 60);
+  const s = String(callTimerSec % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function callControlsHtml(){
+  return `
+    <div class="call-controls">
+      <button type="button" class="ctrl-btn ctrl-speaker" onclick="toggleSpeaker()" title="Гучний зв'язок" aria-label="Гучний зв'язок">${SPEAKER_ICON_SVG}</button>
+      <button type="button" class="ctrl-btn ctrl-hangup" onclick="hangUpCall()" title="Покласти слухавку" aria-label="Покласти слухавку">✕</button>
+    </div>`;
+}
+
+/* Вміст нижньої зони будується окремо від "скелету" дзвінка, щоб його можна було
+   оновлювати ТОЧКОВО (innerHTML лише цього блоку) — без перемальовки qa-зони
+   вище. Саме повторна перемальовка всього call-active й спричиняла "стрибок". */
+function buildResponseAreaHtml(){
+  const s = callState;
+
+  if (s.uiMode === 'hb_speaking'){
+    return `
+      <div class="rec-indicator-label speaking">HearBeat говорить</div>
+      ${VOICE_BARS_HTML}`;
+  }
+
+  if (s.uiMode === 'maria_speaking'){
+    return `
+      <div class="rec-indicator-label listening">Марія відповідає</div>
+      <div class="mic-ring">${MIC_ICON_SVG}</div>`;
+  }
+
+  if (s.uiMode === 'processing'){
+    return `
+      <div class="engine-processing">
+        <div class="engine-processing-icon">${ENGINE_ICON_SVG}</div>
+        <div class="engine-processing-label">HearBeat аналізує голос і відповідь</div>
+        <div class="engine-processing-dots"><span></span><span></span><span></span></div>
+      </div>`;
+  }
+
+  if (s.uiMode === 'maria_choices' && s.choices && s.choices.length){
+    const pickHint = s.choices[0].accept === true && s.stepCount === 0
+      ? 'Продовжити розмову:'
+      : 'Що відповість Марія:';
+    return `
+      <div class="maria-pick">
+        <div class="maria-pick-hint">${pickHint}</div>
+        ${s.choices.map((c, i) => `
+          <button type="button" class="choice-btn-voice" onclick="pickChoice(${i})">
+            <span class="cb-mic">🎙</span>
+            <span class="cb-body">
+              <span class="cb-label">${c.label}</span>
+              <span class="cb-maria">«${c.maria}»</span>
+            </span>
+          </button>
+        `).join('')}
+      </div>`;
+  }
+
+  return '';
+}
+
+/* Точкове оновлення нижньої зони — не чіпає qa-зону вище, тому питання й
+   відповідь, які вже намальовані, лишаються нерухомими. */
+function renderResponseArea(){
+  const el = document.getElementById('callResponseArea');
+  if (el) el.innerHTML = buildResponseAreaHtml();
+}
+
+function renderActiveCall(){
+  const s = callState;
+  const hbLabelCls = 'qa-label' + (s.uiMode === 'hb_speaking' ? ' active' : '');
+  const mariaLabelCls = 'qa-label' + (s.uiMode === 'maria_speaking' ? ' active' : '');
+  const mariaRowCls = 'qa-row qa-row-maria' + (s.mariaShown ? ' shown' : '');
+
+  return `
+    <div class="call-active">
+      <div class="call-active-header">
+        <div class="call-active-name">HearBeat · від Олени</div>
+        <div class="call-active-timer" id="callTimer">${formatCallTimer()}</div>
+      </div>
+      <div class="qa-zone">
+        <div class="qa-row qa-row-hb">
+          <div class="qa-avatar">HB</div>
+          <div class="qa-body">
+            <div class="${hbLabelCls}" id="qaLabelHb">HearBeat</div>
+            <div class="qa-text" id="callQuestionText">${s.hbText}</div>
+          </div>
+        </div>
+        <div class="${mariaRowCls}" id="qaRowMaria">
+          <div class="qa-avatar">М</div>
+          <div class="qa-body">
+            <div class="${mariaLabelCls}" id="qaLabelMaria">Марія</div>
+            <div class="qa-text" id="callAnswerText">${s.mariaText}</div>
+          </div>
+        </div>
+      </div>
+      <div class="call-response-area" id="callResponseArea">${buildResponseAreaHtml()}</div>
+      ${callControlsHtml()}
+    </div>`;
 }
 
 function renderPhone(){
@@ -980,6 +1219,7 @@ function renderPhone(){
   const s = callState;
 
   if (s.phase === 'ringing'){
+    el.className = 'phone-screen';
     el.innerHTML = `
       <div class="call-label">Вхідний дзвінок</div>
       <div class="avatar-ring">💚</div>
@@ -992,105 +1232,168 @@ function renderPhone(){
     return;
   }
 
-  if (s.phase === 'consent'){
-    el.innerHTML = `
-      <div class="consent-box">
-        <div class="call-label">HearBeat</div>
-        <p>Привіт, Маріє! Це коротка розмова для родини, забере хвилину. Гаразд?</p>
-        <div class="consent-actions">
-          <button class="btn btn-primary btn-lg" style="justify-content:center;" onclick="startDialogue()">Так, добре</button>
-          <button class="btn btn-ghost" style="justify-content:center;" onclick="resetCall()">Не зараз</button>
-        </div>
-      </div>`;
-    return;
-  }
-
-  if (s.phase === 'dialogue'){
-    const node = currentNode();
-    const choicesHtml = node.choices.map((c, i) => `
-      <button type="button" class="choice-btn" onclick="pickChoice(${i})">
-        <span class="cb-label">${c.label}</span>
-        <span class="cb-maria">«${c.maria}»</span>
-      </button>
-    `).join('');
-    const followTag = node.followUp ? ' <span class="pill ok" style="font-size:11px;vertical-align:middle;">уточнююче</span>' : '';
-    el.innerHTML = `
-      <div class="question-box">
-        <div class="q-progress">${dialogueProgressDots()}</div>
-        <div class="q-bubble">${node.hb}${followTag}</div>
-        <div class="rec-hint">Оберіть, що відповість Марія (голосом)</div>
-        <div class="dialogue-choices">${choicesHtml}</div>
-      </div>`;
-    return;
-  }
-
-  if (s.phase === 'recording'){
-    const lastHb = [...s.transcript].reverse().find(l => l.who === 'HearBeat');
-    el.innerHTML = `
-      <div class="question-box">
-        <div class="q-bubble">${lastHb ? lastHb.text : ''}</div>
-        <p class="rec-pulse"><span class="rec-dot"></span> Запис відповіді…</p>
-      </div>`;
+  if (s.phase === 'active'){
+    el.className = 'phone-screen call-active-layout';
+    el.innerHTML = renderActiveCall();
     return;
   }
 
   if (s.phase === 'done'){
+    el.className = 'phone-screen';
     const sc = SCENARIOS[s.scenario] || SCENARIOS.normal;
     el.innerHTML = `
       <div class="done-check">${sc.status === 'ok' ? '💚' : '🧡'}</div>
       <div class="call-name" style="font-size:22px;">Дякуємо, Маріє!</div>
       <div class="call-sub">Розмову передано родині. Дивіться нижче ↓</div>
       <button class="btn btn-ghost" style="margin-top:18px;" onclick="resetCall()">Новий дзвінок</button>`;
-    return;
   }
 }
 
-function answerCall(){ callState.phase = 'consent'; renderPhone(); }
-function declineCall(){ renderPhone(); }
+async function typeText(elementId, text, msPerChar){
+  const token = callState.animToken;
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  el.textContent = '';
+  for (let i = 0; i < text.length; i++){
+    if (token !== callState.animToken) return;
+    el.textContent = text.slice(0, i + 1);
+    await delay(msPerChar);
+  }
+}
 
-function startDialogue(){
-  callState.phase = 'dialogue';
+/* Питання HearBeat завжди пишеться зверху й лишається на екрані незмінним
+   протягом усього обміну репліками — тому вибір відповіді нижче його не зсуває. */
+async function speakHB(text, followUp){
+  callState.uiMode = 'hb_speaking';
+  callState.hbText = '';
+  callState.mariaShown = false;
+  callState.mariaText = '';
+  callState.choices = null;
+  renderPhone();
+  await typeText('callQuestionText', text, 30);
+  callState.hbText = text;
+  const lbl = document.getElementById('qaLabelHb');
+  if (lbl) lbl.classList.remove('active');
+  callState.transcript.push({ who: 'HearBeat', text, followUp: !!followUp });
+  await delay(220);
+}
+
+/* Відповідь Марії з'являється ПІД питанням (не стираючи його) — питання зверху
+   лишається незмінним DOM-вузлом, оновлюється лише рядок Марії й нижня зона,
+   тому переходу немає "стрибка". Анімація повільніша, щоб встигнути прочитати. */
+async function speakMaria(text){
+  callState.uiMode = 'maria_speaking';
+  callState.mariaShown = true;
+  callState.mariaText = '';
+  renderResponseArea();
+  const row = document.getElementById('qaRowMaria');
+  if (row) row.classList.add('shown');
+  const lbl = document.getElementById('qaLabelMaria');
+  if (lbl) lbl.classList.add('active');
+  await delay(260);
+  await typeText('callAnswerText', text, 30);
+  callState.mariaText = text;
+  if (lbl) lbl.classList.remove('active');
+  callState.transcript.push({ who: 'Марія', text, user: true });
+
+  /* Замість статичного "записано" — показуємо, що рушій щойно аналізує
+     голос і зміст цієї відповіді. Це той самий AI-core, який рахує
+     acoustic index і формує наступне доречне питання. */
+  callState.uiMode = 'processing';
+  renderResponseArea();
+  await delay(850);
+}
+
+function showMariaChoices(choices){
+  callState.uiMode = 'maria_choices';
+  callState.choices = choices;
+  renderResponseArea();
+}
+
+async function runOpeningSequence(){
+  await speakHB(OPENING_GREETING);
+  if (callState.phase !== 'active') return;
+  showMariaChoices(OPENING_CHOICE);
+}
+
+async function presentDialogueQuestion(){
+  const node = currentNode();
+  await speakHB(node.hb, node.followUp);
+  showMariaChoices(node.choices);
+}
+
+function answerCall(){
+  callState.phase = 'active';
   callState.nodeId = 'q_day';
   callState.stepCount = 0;
   callState.scenario = null;
-  callState.transcript = [
-    ...OPENING_LINES,
-    { who: 'HearBeat', text: 'Коротка розмова для родини, забере хвилину. Гаразд?' },
-    { who: 'Марія', text: 'Так, добре.', user: true },
-    { who: 'HearBeat', text: DIALOGUE_NODES.q_day.hb },
-  ];
-  renderPhone();
+  callState.transcript = [];
+  callState.hbText = '';
+  callState.mariaText = '';
+  callState.mariaShown = false;
+  callState.choices = null;
+  startCallTimer();
+  runOpeningSequence();
 }
 
-function pickChoice(index){
-  const node = currentNode();
-  const choice = node.choices[index];
-  callState.transcript.push({ who: 'Марія', text: choice.maria, user: true });
-  callState.stepCount += 1;
+function declineCall(){
+  showToast('Дзвінок пропущено');
+}
 
-  const next = DIALOGUE_NODES[choice.next];
-  if (next.end){
-    callState.transcript.push({ who: 'HearBeat', text: next.farewell });
-    callState.scenario = next.scenario;
-    callState.phase = 'recording';
-    renderPhone();
-    setTimeout(() => finishCall(next.scenario), 450);
+function toggleSpeaker(){
+  callState.speakerOn = !callState.speakerOn;
+  showToast(callState.speakerOn ? '🔊 Гучний зв\'язок увімкнено' : '🔇 Гучний зв\'язок вимкнено');
+}
+
+function hangUpCall(){
+  stopCallTimer();
+  callState.animToken += 1;
+  if (callState.phase === 'done') return;
+  resetCall();
+  showToast('Дзвінок завершено');
+}
+
+async function pickChoice(index){
+  if (callState.uiMode !== 'maria_choices' || !callState.choices) return;
+  const choice = callState.choices[index];
+  callState.choices = null;
+  callState.animToken += 1;
+  const token = callState.animToken;
+
+  await speakMaria(choice.maria);
+  if (token !== callState.animToken) return;
+
+  if (choice.accept === true && callState.stepCount === 0){
+    callState.stepCount = 0;
+    await presentDialogueQuestion();
     return;
   }
 
-  callState.transcript.push({ who: 'HearBeat', text: next.hb, followUp: next.followUp });
+  if (choice.accept === false){
+    hangUpCall();
+    return;
+  }
+
+  const node = currentNode();
+  callState.stepCount += 1;
+  const next = DIALOGUE_NODES[choice.next];
+
+  if (next.end){
+    await speakHB(next.farewell);
+    if (token !== callState.animToken) return;
+    finishCall(next.scenario);
+    return;
+  }
+
   callState.nodeId = choice.next;
-  callState.phase = 'recording';
-  renderPhone();
-  setTimeout(() => {
-    callState.phase = 'dialogue';
-    renderPhone();
-  }, 450);
+  await presentDialogueQuestion();
 }
 
 function finishCall(scenarioKey){
+  stopCallTimer();
   callState.phase = 'done';
   callState.scenario = scenarioKey;
+  callState.uiMode = 'done';
   renderPhone();
   addHistoryEntryFromCall(scenarioKey, callState.transcript);
   renderCallAnalysis(scenarioKey);
@@ -1101,7 +1404,7 @@ function finishCall(scenarioKey){
 /* Витягуємо змістовну частину діалогу (без вітання/консенту й прощання) —
    саме ці 2–3 обміни репліками стають "excerpt" нового рядка історії. */
 function buildExcerptFromTranscript(transcript){
-  const meaningful = transcript.slice(4, transcript.length - 1);
+  const meaningful = transcript.slice(2, transcript.length - 1);
   return meaningful.slice(-4);
 }
 
@@ -1137,7 +1440,21 @@ function revealFamilySignal(){
 }
 
 function resetCall(){
-  callState = { phase: 'ringing', nodeId: 'q_day', scenario: null, transcript: [], stepCount: 0 };
+  stopCallTimer();
+  callState = {
+    phase: 'ringing',
+    nodeId: 'q_day',
+    scenario: null,
+    transcript: [],
+    stepCount: 0,
+    uiMode: 'idle',
+    hbText: '',
+    mariaText: '',
+    mariaShown: false,
+    choices: null,
+    animToken: 0,
+    speakerOn: true,
+  };
   renderPhone();
   ['stageAnalysis', 'stageFamily'].forEach(id => {
     const el = document.getElementById(id);
