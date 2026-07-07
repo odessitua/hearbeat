@@ -1842,25 +1842,38 @@ function showUserResult(features, index, deltaText, labelText, baselineForJson){
    аби демо-режим і live-режим виглядали за однаковою логікою. */
 const MOCK_FATIGUE_WEIGHTS = { tempo_bpm: 0.35, pause_mean_ms: 0.35, energy_rms: 0.30 };
 
+function mockMetricIndexPct(key, current, baseline){
+  if (baseline === 0) return 100;
+  if (key === 'pause_mean_ms') {
+    if (current <= 0) return 100;
+    return (100 * baseline) / current;
+  }
+  return (100 * current) / baseline;
+}
+
+function mockSignedDeviationPct(current, baseline){
+  if (baseline === 0) return 0;
+  return ((current - baseline) / baseline) * 100;
+}
+
 function computeMockIndex(current, baseline){
   let total = 0;
   let weightSum = 0;
   for (const key in MOCK_FATIGUE_WEIGHTS) {
     const w = MOCK_FATIGUE_WEIGHTS[key];
-    const pct = key === 'pause_mean_ms'
-      ? (current[key] <= 0 ? 100 : (100 * baseline[key]) / current[key])
-      : (100 * current[key]) / baseline[key];
-    total += pct * w;
+    total += mockMetricIndexPct(key, current[key], baseline[key]) * w;
     weightSum += w;
   }
-  return Math.round((total / weightSum) * 10) / 10;
+  if (weightSum === 0) return 100;
+  const index = Math.round((total / weightSum) * 10) / 10;
+  return Number.isFinite(index) ? index : 100;
 }
 
 function mockDeviationDelta(current, baseline, index){
   const devs = [];
-  const tempoDev = ((current.tempo_bpm - baseline.tempo_bpm) / baseline.tempo_bpm) * 100;
-  const pauseDev = ((current.pause_mean_ms - baseline.pause_mean_ms) / baseline.pause_mean_ms) * 100;
-  const energyDev = ((current.energy_rms - baseline.energy_rms) / baseline.energy_rms) * 100;
+  const tempoDev = mockSignedDeviationPct(current.tempo_bpm, baseline.tempo_bpm);
+  const pauseDev = mockSignedDeviationPct(current.pause_mean_ms, baseline.pause_mean_ms);
+  const energyDev = mockSignedDeviationPct(current.energy_rms, baseline.energy_rms);
   if (tempoDev <= -25) devs.push([Math.abs(tempoDev), `Темп мовлення нижчий на ${Math.abs(Math.round(tempoDev))}%`]);
   if (pauseDev >= 25) devs.push([pauseDev, `Паузи довші на ${Math.round(pauseDev)}%`]);
   if (energyDev <= -25) devs.push([Math.abs(energyDev), `Енергія голосу нижча на ${Math.abs(Math.round(energyDev))}%`]);
