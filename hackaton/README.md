@@ -10,30 +10,56 @@
 
 ## Файли в папці
 
+### Стратегія і виконання
+
 | Файл | Призначення | Коли читати |
 |---|---|---|
 | [`hearbeat_project-guide.md`](hearbeat_project-guide.md) | **Головний робочий документ на 48 годин.** Тактичний гайд за блоками 0–6 методички: біль, ICP, скоуп, дані, промпти для Lovable/ML, архітектура, пітч, ролі, ризики | Старт хакатону і весь вікенд |
 | [`hearbeat_product-vision.md`](hearbeat_product-vision.md) | **Повне продуктове бачення:** проблема, ICP, AI-core, «умний дзвінок», бізнес, roadmap 3–6 міс., відповіді на тестове завдання | До пітчу і для слайдів vision |
-| [`hearbeat_pitchdeck-content.md`](hearbeat_pitchdeck-content.md) | **Контент пітчдеку** — 5 слайдів, спікерські нотатки, хронометраж 3 хв, Q&A | Збірка деки і репетиція |
 | [`hackathon-blocks-reference-guide.md`](hackathon-blocks-reference-guide.md) | **Загальний довідник** по блоках методички та інструментах (не прив'язаний до HearBeat) | Шпаргалка в будь-який момент |
+
+### Пітч і візуали
+
+| Файл | Призначення | Коли читати |
+|---|---|---|
+| [`hearbeat_pitchdeck-content.md`](hearbeat_pitchdeck-content.md) | **Контент пітчдеку** — 5 слайдів, спікерські нотатки, хронометраж 3 хв, Q&A | Збірка деки і репетиція |
+| [`hearbeat_pitchdeck-visuals-and-metrics.md`](hearbeat_pitchdeck-visuals-and-metrics.md) | **Доповнення до пітчдеку:** які 3 візуали на які слайди, блок метрик з джерелами, Kintsugi, чесний доказовий розрив | Збірка слайдів і репетиція Q&A |
+| [`hearbeat-visuals.html`](hearbeat-visuals.html) | **Галерея всіх візуалів** — PNG вбудовані в один HTML (офлайн, одне посилання). Планується легка версія без base64 | Швидкий перегляд / вставка в деку |
+
+### Дослідницька база
+
+| Файл | Призначення | Коли читати |
+|---|---|---|
+| [`hearbeat_ux-research-dossier-v2.md`](hearbeat_ux-research-dossier-v2.md) | **Дослідницьке досьє:** персони, CJM, empathy map, JTBD, конкуренти, метрики, план валідації — з джерелами і плейсхолдерами `[ВІЗУАЛ: …]` | Якщо журі питає «як досліджували»; бекстейдж до пітчу |
+
+### Демо
+
+| Файл | Призначення | Коли читати |
+|---|---|---|
+| [`demo-mockup.html`](demo-mockup.html) | **Поточний клікабельний макет** — 3 вкладки (дзвінок, рушій, адмінка) | База для доопрацювання |
+| [`hearbeat_demo-audit-and-spec.md`](hearbeat_demo-audit-and-spec.md) | **Аудит демо + специфікація правок:** що працює, що коштує балів, золотий шлях, брендинг sea-wave, чек-ліст здачі | Перед переписуванням демо |
 
 ---
 
 ## З чого почати
 
 ```
-1. hearbeat_project-guide.md     → що робимо за вікенд і як
-2. hearbeat_product-vision.md    → навіщо продукт і куди росте
-3. hearbeat_pitchdeck-content.md → як це розказати журі
-4. hackathon-blocks-reference-guide.md → якщо потрібна підказка по блоку/інструменту
+1. hearbeat_project-guide.md              → що робимо за вікенд і як
+2. hearbeat_product-vision.md             → навіщо продукт і куди росте
+3. hearbeat_pitchdeck-content.md          → як це розказати журі
+4. hearbeat_pitchdeck-visuals-and-metrics → які картинки на слайди + метрики
+5. hearbeat_ux-research-dossier-v2.md     → дослідницька глибина (бекстейдж)
+6. hearbeat_demo-audit-and-spec.md        → як виправити демо перед здачею
+7. hackathon-blocks-reference-guide.md    → шпаргалка по блоку/інструменту
 ```
 
 **Швидкий орієнтир за ролями:**
 
 | Роль | Перші розділи |
 |---|---|
-| Product / пітч | `project-guide` блоки 1–2, 6 + `pitchdeck-content` |
-| Web / Lovable | `project-guide` блоки 3–5 (бриф, промпти, стек) |
+| Product / пітч | `project-guide` блоки 1–2, 6 + `pitchdeck-content` + `pitchdeck-visuals-and-metrics` |
+| Design / слайди | `hearbeat-visuals.html` + `pitchdeck-visuals-and-metrics` + `ux-research-dossier-v2` |
+| Web / Lovable | `project-guide` блоки 3–5 + `demo-audit-and-spec` → переписати `demo-mockup.html` |
 | ML | `project-guide` блок 4.3 + `product-vision` §7–8 |
 | Усі | `project-guide` «North-star метрики» і «Критерій успіху MVP» |
 
@@ -56,16 +82,30 @@ flowchart LR
   PG[hearbeat_project-guide.md]
   PV[hearbeat_product-vision.md]
   PD[hearbeat_pitchdeck-content.md]
+  PVM[hearbeat_pitchdeck-visuals-and-metrics.md]
+  UX[hearbeat_ux-research-dossier-v2.md]
+  VIS[hearbeat-visuals.html]
+  DEMO[demo-mockup.html]
+  AUD[hearbeat_demo-audit-and-spec.md]
   REF[hackathon-blocks-reference-guide.md]
 
   PV -->|"формулювання, roadmap, бізнес"| PD
   PG -->|"блок 6 → структура слайдів"| PD
   PG -->|"vision vs demo, ICP, скоуп"| PV
+  UX -->|"персони, CJM, конкуренти"| PD
+  UX -->|"плейсхолдери [ВІЗУАЛ]"| VIS
+  PVM -->|"3 візуали на слайди + метрики"| PD
+  PVM --> VIS
+  AUD -->|"специфікація правок"| DEMO
+  PG -->|"блок 5 → демо"| DEMO
   REF -.->|"шпаргалка по блоках 0–6"| PG
 ```
 
 - **`project-guide`** посилається на **`product-vision`** і **`hackathon-blocks-reference-guide`**
 - **`pitchdeck-content`** зібраний з блоку 6 **`project-guide`** і формулювань **`product-vision`**
+- **`pitchdeck-visuals-and-metrics`** доповнює **`pitchdeck-content`** візуалами з **`hearbeat-visuals.html`**
+- **`ux-research-dossier-v2`** — дослідницька основа під пітч; візуали див. у **`hearbeat-visuals.html`**
+- **`demo-audit-and-spec`** описує правки для **`demo-mockup.html`** перед здачею
 
 ---
 
