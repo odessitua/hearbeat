@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HearBeat — Голосова перевірка</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-icon">♥</div>
+      <div>
+        <h1>HearBeat</h1>
+        <div class="logo-sub">Голосова перевірка самопочуття</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span id="baseline-status">Базова лінія: не встановлена</span>
+      <button class="btn btn-outline" id="btn-reset">Скинути</button>
+    </div>
+  </header>
+
+  <!-- ── Main ────────────────────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- Chrome warning -->
+    <div id="chrome-warning" class="chrome-warning hidden">
+      Для роботи голосових функцій потрібен браузер Google Chrome на комп'ютері.
+    </div>
+
+    <!-- ── Screen: IDLE ──────────────────────────────────────────────────── -->
+    <div id="screen-idle" class="screen">
+      <div class="idle-hero">
+        <h2>Привіт!</h2>
+        <p>
+          HearBeat аналізує мовленнєві патерни під час короткої розмови
+          і повідомляє вашу сім'ю про зміни в самопочутті.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="idle-buttons">
+          <button class="btn btn-primary" id="btn-calibrate">
+            Калібрування<br /><small style="font-weight:500;opacity:.85">Встановити базову лінію</small>
+          </button>
+          <button class="btn btn-secondary" id="btn-checkin" disabled>
+            Перевірка<br /><small style="font-weight:500;opacity:.85">Порівняти з базою</small>
+          </button>
+        </div>
+
+        <p style="font-size:0.78rem;color:var(--color-neutral);text-align:center;margin-top:8px;">
+          Спочатку виконайте калібрування, щоб встановити базову лінію.
+        </p>
+      </div>
+
+      <div class="card" style="font-size:0.85rem;color:var(--color-muted);line-height:1.7;">
+        <div class="card-title">Як це працює</div>
+        <p>
+          <strong>1. Калібрування</strong> — ви відповідаєте на 3 питання.
+          Система записує ваші мовленнєві патерни як базову лінію.<br/>
+          <strong>2. Перевірка</strong> — наступного разу відповіді порівнюються з базою.
+          Сім'я отримує короткий звіт про будь-які зміни.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── Screen: SESSION ───────────────────────────────────────────────── -->
+    <div id="screen-session" class="screen">
+      <div class="card session-card">
+        <div class="question-counter" id="question-num">Питання 1 з 3</div>
+        <div class="question-text" id="current-question">Завантаження…</div>
+
+        <div class="waveform-container">
+          <canvas id="waveform" width="560" height="64"></canvas>
+        </div>
+
+        <div class="live-transcript" id="live-transcript">
+          Ваша відповідь з'явиться тут…
+        </div>
+
+        <div class="session-status" id="session-status">Ініціалізація…</div>
+      </div>
+    </div>
+
+    <!-- ── Screen: REPORT ───────────────────────────────────────────────── -->
+    <div id="screen-report" class="screen">
+      <div class="card text-center">
+        <div class="card-title" style="text-align:center;margin-bottom:16px;">Результат перевірки</div>
+        <div class="concern-badge level-normal" id="concern-badge">Норма</div>
+
+        <div class="report-summary" id="report-summary"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Спостережені зміни</div>
+        <ul class="patterns-list" id="report-patterns"></ul>
+      </div>
+
+      <div class="card" style="padding-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="card-title" style="margin:0;">Детальні метрики</div>
+          <button class="btn btn-ghost btn-sm" id="btn-debug-toggle">Показати метрики</button>
+        </div>
+        <div class="debug-panel" id="debug-panel">
+          <table class="debug-table" id="debug-table"></table>
+        </div>
+      </div>
+
+      <div class="disclaimer" id="report-disclaimer"></div>
+
+      <div class="mt-16">
+        <button class="btn btn-primary btn-full" id="btn-new-checkin">
+          Нова перевірка
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Toast ───────────────────────────────────────────────────────────── -->
+  <div id="toast"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

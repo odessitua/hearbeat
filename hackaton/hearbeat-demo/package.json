@@ -1,0 +1,15 @@
+{
+  "name": "hearbeat-demo",
+  "version": "1.0.0",
+  "description": "HearBeat hackathon demo — AI voice check-in for elderly wellness monitoring",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.36.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
+  }
+}
