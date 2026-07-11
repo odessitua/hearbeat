@@ -2,6 +2,8 @@
 
 Voice check-in demo: emulated call → acoustic analysis → family dashboard.
 
+**Repo:** [github.com/odessitua/hearbeat](https://github.com/odessitua/hearbeat) · **HTML demo:** [demo-mockup-v2.html](https://odessitua.github.io/hearbeat/hackaton/demo-mockup-v2.html)
+
 **Specs**: [`../specs/001-hearbeat-hackathon-mvp/`](../specs/001-hearbeat-hackathon-mvp/)  
 **Architecture**: [`docs/architecture.md`](docs/architecture.md) — структура папок, потоки данных, mock-режим  
 **Scoring**: [`docs/acoustic-scoring.md`](docs/acoustic-scoring.md) — acoustic index, baseline, тренд  

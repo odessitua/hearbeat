@@ -2,6 +2,9 @@
 
 Робоча папка команди **HearBeat** — голосові чек-іни для сімей на відстані (ніша **Aging & Longevity**).
 
+**Репозиторій:** [github.com/odessitua/hearbeat](https://github.com/odessitua/hearbeat)  
+**Демо (GitHub Pages):** [demo-mockup-v2.html](https://odessitua.github.io/hearbeat/hackaton/demo-mockup-v2.html)
+
 **Хакатон:** [Digital Future Hackathon](https://hackathon.lezo.io/) · 11–12 липня 2026 · онлайн, AI-first / no-code
 
 **Стратегія команди:** «повна продуктова модель + мінімальне демо». На сцені — цільовий продукт; на екрані — доказ AI-core за вікенд.
@@ -36,7 +39,9 @@
 
 | Файл | Призначення | Коли читати |
 |---|---|---|
-| [`demo-mockup.html`](demo-mockup.html) | **Поточний клікабельний макет** — 3 вкладки (дзвінок, рушій, адмінка) | База для доопрацювання |
+| [`demo-mockup-v2.html`](demo-mockup-v2.html) | **Поточне публічне демо** — замкнений сценарій (дзвінок → рушій → dashboard) | Здача хакатону, GitHub Pages |
+| [`demo-mockup.html`](demo-mockup.html) | Попередній макет — 3 вкладки (дзвінок, рушій, адмінка) | Архів / порівняння |
+| [`hearbeat-engine/`](hearbeat-engine/) | Мінімальний ML API для live-режиму в `demo-mockup-v2.html` | Деплой на Render/Railway |
 | [`hearbeat_demo-audit-and-spec.md`](hearbeat_demo-audit-and-spec.md) | **Аудит демо + специфікація правок:** що працює, що коштує балів, золотий шлях, брендинг sea-wave, чек-ліст здачі | Перед переписуванням демо |
 
 ---
@@ -85,7 +90,7 @@ flowchart LR
   PVM[hearbeat_pitchdeck-visuals-and-metrics.md]
   UX[hearbeat_ux-research-dossier-v2.md]
   VIS[hearbeat-visuals.html]
-  DEMO[demo-mockup.html]
+  DEMO[demo-mockup-v2.html]
   AUD[hearbeat_demo-audit-and-spec.md]
   REF[hackathon-blocks-reference-guide.md]
 
@@ -105,7 +110,7 @@ flowchart LR
 - **`pitchdeck-content`** зібраний з блоку 6 **`project-guide`** і формулювань **`product-vision`**
 - **`pitchdeck-visuals-and-metrics`** доповнює **`pitchdeck-content`** візуалами з **`hearbeat-visuals.html`**
 - **`ux-research-dossier-v2`** — дослідницька основа під пітч; візуали див. у **`hearbeat-visuals.html`**
-- **`demo-audit-and-spec`** описує правки для **`demo-mockup.html`** перед здачею
+- **`demo-audit-and-spec`** описує правки для **`demo-mockup-v2.html`** (і попереднього **`demo-mockup.html`**) перед здачею
 
 ---
 

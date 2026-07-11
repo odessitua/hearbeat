@@ -1,8 +1,11 @@
-# EduQuest AI
+# HearBeat
 
-Рабочий репозиторий для подготовки к [Digital Future Hackathon](https://hackathon.lezo.io/) (11–12 июля 2026).
+Репозиторий команды **HearBeat** — подготовка и реализация MVP для [Digital Future Hackathon](https://hackathon.lezo.io/) (11–12 июля 2026).
 
-Название репозитория условное. Текущий фокус — продукт **HearBeat** в нише **Aging & Longevity**: голосовые чек-ины для семей на расстоянии, акустический анализ голоса и dashboard для взрослых детей.
+**Репозиторий:** [github.com/odessitua/hearbeat](https://github.com/odessitua/hearbeat)  
+**Демо:** [`hackaton/demo-mockup-v2.html`](hackaton/demo-mockup-v2.html) · [открыть на GitHub Pages](https://odessitua.github.io/hearbeat/hackaton/demo-mockup-v2.html) (ветка `main`, папка `/` в Settings → Pages)
+
+Продукт в нише **Aging & Longevity**: голосовые чек-ины для семей на расстоянии, акустический анализ голоса и dashboard для взрослых детей.
 
 ## Контекст хакатона
 
@@ -15,13 +18,24 @@
 
 ## Структура репозитория
 
+### `HearBeat/` — код MVP
+
+| Путь | Назначение |
+|---|---|
+| [`HearBeat/README.md`](HearBeat/README.md) | Быстрый старт: web, ML API, Supabase, деплой |
+| [`HearBeat/web/`](HearBeat/web/) | React/Vite фронтенд (чек-ин, dashboard, ML-demo) |
+| [`HearBeat/ml/`](HearBeat/ml/) | Python ML API: акустика, scoring, summary |
+| [`HearBeat/docs/`](HearBeat/docs/) | Архитектура и acoustic scoring |
+
 ### `hackaton/` — подготовка к хакатону
 
 | Файл | Назначение |
 |---|---|
+| [`hackaton/README.md`](hackaton/README.md) | Оглавление папки, золотой путь демо, артефакты сдачи |
+| [`demo-mockup-v2.html`](hackaton/demo-mockup-v2.html) | **Публичное HTML-демо** — замкнутый сценарий для журі |
 | [`hearbeat_project-guide.md`](hackaton/hearbeat_project-guide.md) | **Главный рабочий документ.** Проектный гайд HearBeat по блокам 0–6 методички: боль, скоуп, демо, промпты для Lovable/ML, питч, роли команды |
 | [`hackathon-blocks-reference-guide.md`](hackaton/hackathon-blocks-reference-guide.md) | Общий справочник по блокам хакатон-методички и полезным инструментам (не привязан к конкретной фиче) |
-| [`pre-hackathon-prep-guide.md`](hackaton/pre-hackathon-prep-guide.md) | Чеклист подготовки до старта: аккаунты, что сгенерировать заранее, роли AI-агентов, план до 11 июля |
+| [`hearbeat-engine/`](hackaton/hearbeat-engine/) | Минимальный акустический API для live-режима в `demo-mockup-v2.html` |
 
 ### `brainstorm/` — идеи и продуктовое видение
 
@@ -68,8 +82,9 @@ uvx --from git+https://github.com/github/spec-kit.git@v0.12.4 specify integratio
 |---|---|
 | Понять полный продукт и roadmap | [`brainstorm/hearbeat_product-vision.md`](brainstorm/hearbeat_product-vision.md) |
 | Готовиться к хакатону, собирать демо | [`hackaton/hearbeat_project-guide.md`](hackaton/hearbeat_project-guide.md) |
+| Открыть публичное демо | [`hackaton/demo-mockup-v2.html`](hackaton/demo-mockup-v2.html) (или GitHub Pages) |
 | Разобраться в блоках методички | [`hackaton/hackathon-blocks-reference-guide.md`](hackaton/hackathon-blocks-reference-guide.md) |
-| Подготовить всё до 11 июля | [`hackaton/pre-hackathon-prep-guide.md`](hackaton/pre-hackathon-prep-guide.md) |
+| Запустить код MVP локально | [`HearBeat/README.md`](HearBeat/README.md) |
 | Сравнить с другими идеями | [`brainstorm/ideas.md`](brainstorm/ideas.md) |
 | Начать spec-driven разработку фичи | Spec Kit skills в Cursor: `/speckit-constitution` → `/speckit-specify` → … |
 
@@ -83,4 +98,4 @@ uvx --from git+https://github.com/github/spec-kit.git@v0.12.4 specify integratio
 
 ## Текущий этап
 
-Брейншторм завершён, выбрано направление **HearBeat** (Aging & Longevity). Следующий шаг — подготовка к хакатону по [`hackaton/hearbeat_project-guide.md`](hackaton/hearbeat_project-guide.md) и [`hackaton/pre-hackathon-prep-guide.md`](hackaton/pre-hackathon-prep-guide.md).
+Брейншторм завершён, выбрано направление **HearBeat** (Aging & Longevity). Следующий шаг — подготовка к хакатону по [`hackaton/hearbeat_project-guide.md`](hackaton/hearbeat_project-guide.md) и публичное демо [`hackaton/demo-mockup-v2.html`](hackaton/demo-mockup-v2.html).

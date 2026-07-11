@@ -51,9 +51,9 @@ uvicorn app:app --reload --port 8000
 ### Варіант A — з цього репозиторію (monorepo)
 
 1. Закомітьте й запуште `hackaton/hearbeat-engine/` на GitHub (разом із
-   рештою `eduquest-ai`).
+   рештою [hearbeat](https://github.com/odessitua/hearbeat)).
 2. На [Railway](https://railway.app) або [Render](https://render.com): **New
-   Web Service** → підключіть репозиторій `eduquest-ai`.
+   Web Service** → підключіть репозиторій `odessitua/hearbeat`.
 3. **Root directory** (Render: *Root Directory*; Railway: *Settings → Root
    Directory*): `hackaton/hearbeat-engine` — платформа збиратиме лише цю папку,
    а не весь репозиторій.
@@ -71,8 +71,8 @@ uvicorn app:app --reload --port 8000
 
 4. Build: `pip install -r requirements.txt`
 5. Start: `uvicorn app:app --host 0.0.0.0 --port $PORT`
-6. Env (опційно): `CORS_ORIGINS=https://your-demo.vercel.app` — URL, з якого
-   відкривається HTML-демка (через кому, якщо кілька).
+6. Env (опційно): `CORS_ORIGINS=https://odessitua.github.io` — origin GitHub Pages
+   (через кому, якщо кілька: Vercel, локальний preview тощо).
 
 Після деплою скопіюйте публічний URL сервісу (наприклад
 `https://hearbeat-engine.onrender.com`) у `demo-mockup-v2.html`:

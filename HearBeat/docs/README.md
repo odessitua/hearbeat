@@ -1,5 +1,7 @@
 # Документация HearBeat
 
+Репозиторий: [github.com/odessitua/hearbeat](https://github.com/odessitua/hearbeat)
+
 | Документ | О чём |
 |----------|--------|
 | [architecture.md](./architecture.md) | Архитектура, папки, потоки данных, mock-режим |
